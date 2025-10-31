@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Animated, Easing, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { documentaryLibrary } from '@/constants/content';
+import type { Documentary } from '@/constants/content';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { isStreamingUrl, resolveVideoSource } from '@/utils/media';
@@ -54,8 +55,14 @@ export default function DocumentaryLibraryScreen() {
     [selectedSlug],
   );
 
-  const videoSource = useMemo(() => resolveVideoSource(selectedDocument?.url), [selectedDocument?.url]);
   const isStreaming = isStreamingUrl(selectedDocument?.url);
+  const videoSource = useMemo(() => {
+    if (!selectedDocument?.url || isStreamingUrl(selectedDocument.url)) {
+      return undefined;
+    }
+
+    return resolveVideoSource(selectedDocument.url);
+  }, [selectedDocument?.url]);
 
   const handleSelectDocument = useCallback(
     (slug: string) => {
@@ -63,6 +70,41 @@ export default function DocumentaryLibraryScreen() {
       router.setParams({ slug });
     },
     [router],
+  );
+
+  const openDocumentLink = useCallback(async (doc: Documentary) => {
+    const streaming = isStreamingUrl(doc.url);
+
+    if (!streaming) {
+      Alert.alert(
+        'Streaming unavailable',
+        'This documentary does not include an online streaming link yet.',
+      );
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(doc.url);
+
+      if (!supported) {
+        throw new Error('Unsupported URL');
+      }
+
+      await Linking.openURL(doc.url);
+    } catch {
+      Alert.alert(
+        'Unable to open link',
+        'There was a problem opening this documentary in your browser. Please try again later.',
+      );
+    }
+  }, []);
+
+  const handlePressDocument = useCallback(
+    (doc: Documentary) => {
+      handleSelectDocument(doc.slug);
+      void openDocumentLink(doc);
+    },
+    [handleSelectDocument, openDocumentLink],
   );
 
   useFocusEffect(
@@ -166,31 +208,51 @@ export default function DocumentaryLibraryScreen() {
         <ThemedText type="subtitle" style={styles.viewerHeading}>
           {selectedDocument ? `Now playing: ${selectedDocument.title}` : 'Select a documentary to play'}
         </ThemedText>
-        {videoSource ? (
-          <View style={styles.videoWrapper}>
-            <Video
-              key={selectedDocument?.slug ?? 'video-player'}
-              ref={(ref) => {
-                videoRef.current = ref;
-              }}
-              style={styles.video}
-              source={videoSource}
-              resizeMode={ResizeMode.CONTAIN}
-              useNativeControls
-              shouldPlay={false}
-            />
-          </View>
+        {selectedDocument ? (
+          <>
+            {isStreaming ? (
+              <>
+                <ThemedText style={styles.viewerStreamingNote}>
+                  This film streams on YouTube. Open the latest cut in your browser.
+                </ThemedText>
+                <Pressable
+                  onPress={() => void openDocumentLink(selectedDocument)}
+                  style={({ pressed }) => [
+                    styles.viewerButton,
+                    { backgroundColor: palette.tint, opacity: pressed ? 0.85 : 1 },
+                  ]}
+                >
+                  <IconSymbol name="play.rectangle.fill" size={18} color={palette.background} />
+                  <ThemedText style={[styles.viewerButtonText, { color: palette.background }]}>Watch on YouTube</ThemedText>
+                </Pressable>
+              </>
+            ) : videoSource ? (
+              <View style={styles.videoWrapper}>
+                <Video
+                  key={selectedDocument.slug}
+                  ref={(ref) => {
+                    videoRef.current = ref;
+                  }}
+                  style={styles.video}
+                  source={videoSource}
+                  resizeMode={ResizeMode.CONTAIN}
+                  useNativeControls
+                  shouldPlay={false}
+                />
+              </View>
+            ) : (
+              <ThemedText style={styles.viewerPlaceholder}>
+                Add a video URL to this documentary to watch it without leaving the app.
+              </ThemedText>
+            )}
+            <ThemedText style={styles.viewerSummary}>{selectedDocument.summary}</ThemedText>
+            {!isStreaming && videoSource && (
+              <ThemedText style={styles.viewerMeta}>Playing from local library path.</ThemedText>
+            )}
+          </>
         ) : (
           <ThemedText style={styles.viewerPlaceholder}>
-            Add a video URL to this documentary to watch it without leaving the app.
-          </ThemedText>
-        )}
-        {selectedDocument && (
-          <ThemedText style={styles.viewerSummary}>{selectedDocument.summary}</ThemedText>
-        )}
-        {selectedDocument && videoSource && (
-          <ThemedText style={styles.viewerMeta}>
-            {isStreaming ? 'Streaming directly from source.' : 'Playing from local library path.'}
+            Select a documentary to explore streaming options and briefing notes.
           </ThemedText>
         )}
       </ThemedView>
@@ -211,7 +273,7 @@ export default function DocumentaryLibraryScreen() {
           ]}
         >
           <Pressable
-            onPress={() => handleSelectDocument(doc.slug)}
+            onPress={() => handlePressDocument(doc)}
             android_ripple={{ color: palette.tint, borderless: false }}
             style={({ pressed }) => [
               styles.card,
@@ -302,6 +364,24 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.85,
     alignSelf: 'flex-start',
+  },
+  viewerStreamingNote: {
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  viewerButton: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  viewerButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   heroContainer: {
     flex: 1,
