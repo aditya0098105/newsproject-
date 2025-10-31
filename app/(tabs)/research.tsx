@@ -92,6 +92,63 @@ const fundingNarratives = [
   },
 ];
 
+const dueDiligenceProtocols = [
+  {
+    phase: 'Exploration window',
+    focus: 'Immersive lab residency, ethics council intake, interoperability mapping.',
+    validation:
+      '45-day sprint with reproducibility audits across partner labs, red-teaming safety cases alongside independent reviewers.',
+  },
+  {
+    phase: 'Deployment rehearsal',
+    focus: 'Pilot-scale manufacturing, supply assurance, community impact modelling.',
+    validation:
+      'Scenario stress-tests with regulators, procurement partners, and affected municipalities before green-light.',
+  },
+  {
+    phase: 'Capital activation',
+    focus: 'Structured co-investment syndicates, milestone-based disbursement, open impact ledgering.',
+    validation:
+      'Live telemetry on impact KPIs, quarterly governance summits, and transparent variance reporting for funders.',
+  },
+];
+
+const fieldDeploymentOutcomes = [
+  {
+    region: 'Mekong River Basin',
+    result: '52% nutrient runoff reduction within 8 months',
+    highlight:
+      'Planetary Systems Lab deployed quantum-activated catalysts through local cooperatives, halving fertiliser waste while boosting farmer margins.',
+  },
+  {
+    region: 'São Paulo Immunology Network',
+    result: 'Autoimmune relapse hospitalisations down 38%',
+    highlight:
+      'Programmable Cellular Therapies cohort integrated with public hospitals, supported by adaptive dosage protocols in the city’s digital health spine.',
+  },
+  {
+    region: 'Coral Triangle Coalition',
+    result: '4.1M reef organisms monitored in real time',
+    highlight:
+      'Sentinel AI mesh network fuses satellite, acoustic, and diver telemetry—feeding interventions that restored keystone coral cover above 70%.',
+  },
+];
+
+const knowledgeNetwork = [
+  {
+    label: '72 partner labs',
+    detail: 'From regenerative biotech to climate systems modelling, aligned on open science standards.',
+  },
+  {
+    label: '11 regulatory sandboxes',
+    detail: 'Cross-border compliance fast-tracked with agencies in the EU, Latin America, and APAC.',
+  },
+  {
+    label: '36 civic alliances',
+    detail: 'Community foundations and municipal coalitions anchoring responsible deployment.',
+  },
+];
+
 export default function ResearchScreen() {
   const colorScheme = useColorScheme();
   const palette = Colors[colorScheme ?? 'light'];
@@ -99,6 +156,7 @@ export default function ResearchScreen() {
   const softSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.6)' : 'rgba(241, 245, 249, 0.65)';
   const divider = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.25)' : 'rgba(15, 23, 42, 0.08)';
   const accentText = colorScheme === 'dark' ? '#f8fafc' : '#0f172a';
+  const timelineAccent = colorScheme === 'dark' ? 'rgba(94, 234, 212, 0.65)' : 'rgba(13, 148, 136, 0.6)';
 
   return (
     <ParallaxScrollView
@@ -256,6 +314,68 @@ export default function ResearchScreen() {
         </View>
       </ThemedView>
 
+      <ThemedView style={[styles.section, styles.timelinePanel]} lightColor={cardSurface} darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Due diligence we run before capital lands
+        </ThemedText>
+        <View style={styles.timelineList}>
+          {dueDiligenceProtocols.map((item) => (
+            <View key={item.phase} style={[styles.timelineItem, { borderLeftColor: timelineAccent }]}>
+              <View style={styles.timelineHeader}>
+                <ThemedText type="subtitle" style={styles.timelinePhase}>
+                  {item.phase}
+                </ThemedText>
+                <ThemedText style={styles.timelineFocus}>{item.focus}</ThemedText>
+              </View>
+              <ThemedText style={styles.timelineValidation}>{item.validation}</ThemedText>
+            </View>
+          ))}
+        </View>
+      </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <View style={styles.sectionHeaderRow}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Field deployment outcomes from our portfolio
+          </ThemedText>
+          <View style={[styles.sectionBadge, { backgroundColor: softSurface }]}>
+            <ThemedText style={[styles.sectionBadgeText, { color: accentText }]}>Verified annually</ThemedText>
+          </View>
+        </View>
+        <View style={styles.grid}>
+          {fieldDeploymentOutcomes.map((outcome) => (
+            <ThemedView
+              key={outcome.region}
+              style={[styles.card, styles.outcomeCard, { borderColor: divider }]}
+              lightColor={cardSurface}
+              darkColor={cardSurface}>
+              <ThemedText type="subtitle" style={styles.cardTitle}>
+                {outcome.region}
+              </ThemedText>
+              <ThemedText style={styles.outcomeResult}>{outcome.result}</ThemedText>
+              <ThemedText style={styles.cardSummary}>{outcome.highlight}</ThemedText>
+            </ThemedView>
+          ))}
+        </View>
+      </ThemedView>
+
+      <ThemedView style={[styles.section, styles.signalPanel]} lightColor={cardSurface} darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Our coalition at a glance
+        </ThemedText>
+        <View style={styles.metricsRow}>
+          {knowledgeNetwork.map((node) => (
+            <View
+              key={node.label}
+              style={[styles.metricCard, styles.networkCard, { borderColor: divider, backgroundColor: softSurface }]}
+            >
+              <ThemedText style={[styles.metricValue, { color: accentText }]}>{node.label}</ThemedText>
+              <ThemedText style={styles.metricDetail}>{node.detail}</ThemedText>
+            </View>
+          ))}
+        </View>
+      </ThemedView>
+
       <ThemedView style={[styles.section, styles.closingPanel]} lightColor={cardSurface} darkColor={cardSurface}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           Why partners choose Timeline Intelligence
@@ -406,6 +526,10 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1,
   },
+  timelinePanel: {
+    gap: 24,
+    borderWidth: 1,
+  },
   metricsRow: {
     flexDirection: 'row',
     gap: 16,
@@ -442,6 +566,30 @@ const styles = StyleSheet.create({
     gap: 8,
     flexWrap: 'wrap',
   },
+  timelineList: {
+    gap: 16,
+  },
+  timelineItem: {
+    gap: 12,
+    borderLeftWidth: 3,
+    paddingLeft: 16,
+  },
+  timelineHeader: {
+    gap: 6,
+  },
+  timelinePhase: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  timelineFocus: {
+    fontSize: 15,
+    lineHeight: 22,
+    opacity: 0.85,
+  },
+  timelineValidation: {
+    fontSize: 15,
+    lineHeight: 24,
+  },
   closingPanel: {
     gap: 24,
     borderWidth: 1,
@@ -451,5 +599,15 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     padding: 20,
+  },
+  outcomeCard: {
+    gap: 12,
+  },
+  outcomeResult: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  networkCard: {
+    minWidth: 220,
   },
 });
