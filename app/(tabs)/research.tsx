@@ -25,6 +25,95 @@ const highlightStats = [
   },
 ];
 
+const keyInsights = [
+  {
+    eyebrow: 'Finding 01',
+    title: 'Regional polarization persists',
+    summary:
+      'Europe’s cluster of high performers keeps the global mean buoyant while Africa and the Americas trail despite reform narratives.',
+    bullets: [
+      '82.8 average among the five European inclusions compared with 61.0 for African peers.',
+      'Reform efforts focus on beneficial ownership, procurement integrity, and digitalized oversight.',
+    ],
+  },
+  {
+    eyebrow: 'Finding 02',
+    title: 'Momentum remains fragile',
+    summary:
+      'Only three countries recorded score gains, underscoring how difficult it is to secure durable anti-corruption advances.',
+    bullets: [
+      'Rwanda’s +2 increase is tied to e-procurement and service delivery upgrades.',
+      'Eight countries were flat year-on-year, signalling stalled reform pipelines.',
+    ],
+  },
+  {
+    eyebrow: 'Finding 03',
+    title: 'Narratives need localized framing',
+    summary:
+      'Stakeholder interviews highlight demand for region-specific explainers to complement aggregate dashboards inside the app.',
+    bullets: [
+      'Policy teams request briefs tying CPI changes to legislative timelines.',
+      'Newsroom editors value quick-read context blocks for live coverage moments.',
+    ],
+  },
+];
+
+const methodologyHighlights = [
+  {
+    label: 'Data cadence',
+    detail: 'Annual CPI release (January) complemented with newsroom desk research updates every quarter.',
+  },
+  {
+    label: 'Sampling lens',
+    detail: 'Spotlight countries selected for geographic balance, reform momentum, and newsroom story alignment.',
+  },
+  {
+    label: 'Quality controls',
+    detail: 'Source citations double-checked against Transparency International publications and government gazettes.',
+  },
+];
+
+const timelineMilestones = [
+  {
+    period: 'Jan 2024',
+    title: 'CPI 2023 release',
+    description: 'Transparency International publishes refreshed rankings; dataset imported into the module within 48 hours.',
+  },
+  {
+    period: 'Mar 2024',
+    title: 'Regional desk reviews',
+    description: 'Editorial analysts validate regional narratives with subject-matter experts and align messaging for newsroom briefs.',
+  },
+  {
+    period: 'Jun 2024',
+    title: 'Stakeholder validation',
+    description: 'Policy fellows and partner NGOs review insights to ensure resonance with advocacy roadmaps.',
+  },
+  {
+    period: 'Sep 2024',
+    title: 'Product iteration',
+    description: 'Design team implements refreshed layout and adds callouts for notable movers based on feedback.',
+  },
+];
+
+const applicationUseCases = [
+  {
+    title: 'Editorial planning',
+    description:
+      'Identifies high-impact governance stories and supplies anchor data for weekend long-reads and newsletter segments.',
+  },
+  {
+    title: 'Policy briefings',
+    description:
+      'Provides a conversation starter for stakeholder meetings, particularly with regional think tanks and donor roundtables.',
+  },
+  {
+    title: 'Product partnerships',
+    description:
+      'Illustrates how the news app packages governance intelligence, supporting sponsorship pitches and content syndication deals.',
+  },
+];
+
 const paperSections = [
   {
     title: 'Abstract',
@@ -168,6 +257,100 @@ export default function ResearchScreen() {
         </ThemedText>
       </ThemedView>
 
+      <ThemedView
+        style={[styles.section, styles.keyInsights, { borderColor: divider }]}
+        lightColor={cardSurface}
+        darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Key findings at a glance
+        </ThemedText>
+        <View style={styles.insightGrid}>
+          {keyInsights.map((insight) => (
+            <ThemedView
+              key={insight.title}
+              style={[styles.insightCard, { backgroundColor: softSurface }]}
+              lightColor={softSurface}
+              darkColor={softSurface}>
+              <ThemedText style={styles.insightEyebrow}>{insight.eyebrow}</ThemedText>
+              <ThemedText type="subtitle" style={styles.insightTitle}>
+                {insight.title}
+              </ThemedText>
+              <ThemedText style={styles.sectionCopy}>{insight.summary}</ThemedText>
+              <View style={styles.bulletList}>
+                {insight.bullets.map((point) => (
+                  <View key={point.slice(0, 32)} style={styles.bulletRow}>
+                    <View style={[styles.bulletDot, { backgroundColor: palette.accent }]} />
+                    <ThemedText style={styles.bulletText}>{point}</ThemedText>
+                  </View>
+                ))}
+              </View>
+            </ThemedView>
+          ))}
+        </View>
+      </ThemedView>
+
+      <ThemedView
+        style={[styles.section, styles.methodologyCard, { borderColor: divider }]}
+        lightColor={cardSurface}
+        darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Methodology snapshot
+        </ThemedText>
+        <View style={styles.methodologyGrid}>
+          {methodologyHighlights.map((item) => (
+            <View key={item.label} style={[styles.methodologyItem, { borderColor: divider }]}> 
+              <ThemedText style={[styles.methodologyLabel, { color: accentText }]}>{item.label}</ThemedText>
+              <ThemedText style={styles.sectionCopy}>{item.detail}</ThemedText>
+            </View>
+          ))}
+        </View>
+      </ThemedView>
+
+      <ThemedView
+        style={[styles.section, styles.timelineSection, { borderColor: divider }]}
+        lightColor={cardSurface}
+        darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Research production timeline
+        </ThemedText>
+        <View style={styles.timeline}>
+          {timelineMilestones.map((milestone, index) => (
+            <View key={milestone.title} style={styles.timelineItem}>
+              <View style={styles.timelineMarkerContainer}>
+                <View style={[styles.timelineMarker, { borderColor: palette.accent }]} />
+                {index !== timelineMilestones.length - 1 && <View style={[styles.timelineConnector, { borderColor: divider }]} />}
+              </View>
+              <View style={styles.timelineContent}>
+                <ThemedText style={[styles.timelinePeriod, { color: accentText }]}>{milestone.period}</ThemedText>
+                <ThemedText type="subtitle" style={styles.timelineTitle}>
+                  {milestone.title}
+                </ThemedText>
+                <ThemedText style={styles.sectionCopy}>{milestone.description}</ThemedText>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ThemedView>
+
+      <ThemedView
+        style={[styles.section, styles.useCaseSection, { borderColor: divider }]}
+        lightColor={cardSurface}
+        darkColor={cardSurface}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          How stakeholders apply these insights
+        </ThemedText>
+        <View style={styles.useCaseGrid}>
+          {applicationUseCases.map((useCase) => (
+            <View key={useCase.title} style={[styles.useCaseCard, { borderColor: divider }]}> 
+              <ThemedText type="subtitle" style={styles.useCaseTitle}>
+                {useCase.title}
+              </ThemedText>
+              <ThemedText style={styles.sectionCopy}>{useCase.description}</ThemedText>
+            </View>
+          ))}
+        </View>
+      </ThemedView>
+
       {paperSections.map((section) => (
         <ThemedView
           key={section.title}
@@ -254,6 +437,9 @@ const styles = StyleSheet.create({
     padding: 24,
     borderRadius: 24,
   },
+  keyInsights: {
+    borderWidth: 1,
+  },
   visionCard: {
     borderWidth: 1,
   },
@@ -275,6 +461,115 @@ const styles = StyleSheet.create({
   sectionCopy: {
     fontSize: 17,
     lineHeight: 26,
+  },
+  insightGrid: {
+    gap: 20,
+  },
+  insightCard: {
+    gap: 12,
+    borderRadius: 20,
+    padding: 20,
+  },
+  insightEyebrow: {
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  insightTitle: {
+    fontSize: 20,
+    lineHeight: 26,
+  },
+  bulletList: {
+    gap: 10,
+    marginTop: 4,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    marginTop: 8,
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  methodologyCard: {
+    borderWidth: 1,
+  },
+  methodologyGrid: {
+    gap: 16,
+  },
+  methodologyItem: {
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 16,
+  },
+  methodologyLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  timelineSection: {
+    borderWidth: 1,
+  },
+  timeline: {
+    gap: 24,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  timelineMarkerContainer: {
+    alignItems: 'center',
+  },
+  timelineMarker: {
+    width: 16,
+    height: 16,
+    borderRadius: 999,
+    borderWidth: 3,
+  },
+  timelineConnector: {
+    flex: 1,
+    width: 1,
+    borderLeftWidth: 1,
+    marginTop: 6,
+  },
+  timelineContent: {
+    flex: 1,
+    gap: 6,
+  },
+  timelinePeriod: {
+    fontSize: 13,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  timelineTitle: {
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  useCaseSection: {
+    borderWidth: 1,
+  },
+  useCaseGrid: {
+    gap: 16,
+  },
+  useCaseCard: {
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 18,
+  },
+  useCaseTitle: {
+    fontSize: 18,
+    lineHeight: 24,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
