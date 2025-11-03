@@ -50,6 +50,12 @@ const quickActions = [
     route: '/protests',
   },
   {
+    title: 'Science Podcasts',
+    subtitle: 'Immersive mission audio',
+    icon: 'mic.fill',
+    route: '/(tabs)/podcasts',
+  },
+  {
     title: 'Expose',
     subtitle: 'Accountability spotlight',
     icon: 'exclamationmark.triangle.fill',

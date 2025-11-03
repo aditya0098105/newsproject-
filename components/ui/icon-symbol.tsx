@@ -21,6 +21,7 @@ const MAPPING = {
   'exclamationmark.triangle.fill': 'warning',
   'slider.horizontal.3': 'tune',
   'book.pages.fill': 'menu-book',
+  'mic.fill': 'mic',
 } as IconMapping;
 
 /**
