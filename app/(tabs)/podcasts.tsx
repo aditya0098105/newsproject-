@@ -31,25 +31,25 @@ const heroHighlights: HeroHighlight[] = [
 
 const quickSpotlights = [
   {
-    title: 'Deep Space Debriefs',
-    description: 'High-altitude news packages from NASA, ESA, and SpaceX mission rooms.',
+    title: 'The Daily',
+    description: 'The New York Times reporters unpack the biggest stories with on-the-ground context and interviews.',
     image:
-      'https://images.unsplash.com/photo-1581091870622-3d5a19c9af1a?auto=format&fit=crop&w=1400&q=80',
-    url: 'https://www.nasa.gov/podcasts/',
+      'https://static01.nyt.com/images/2019/05/01/podcasts/the-daily-album-art/the-daily-album-art-superJumbo-v3.jpg',
+    url: 'https://www.nytimes.com/column/the-daily',
   },
   {
-    title: 'Climate Solutions Daily',
-    description: 'Dispatches on adaptation finance, grid innovation, and frontline resilience.',
+    title: 'Today, Explained',
+    description: 'Vox journalists break down the news with expert voices and vivid explainers every weekday.',
     image:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
-    url: 'https://www.theguardian.com/environment/climate-crisis',
+      'https://content.production.cdn.art19.com/images/28/74/21/28742151-9daa-4f5c-a0a9-0f72e0c127fd/6d686293-9490-11e8-bb7a-b7f3b9a3c6b9/TodayExplained2024.jpg',
+    url: 'https://www.vox.com/today-explained-podcast',
   },
   {
-    title: 'BioFrontier Notebook',
-    description: 'Microbiome therapeutics, CRISPR leaps, and translational lab reports.',
+    title: 'Up First',
+    description: 'Start the day with NPR’s concise headlines, field reporting, and timely conversations.',
     image:
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1400&q=80',
-    url: 'https://www.nature.com/subjects/biotechnology/podcast',
+      'https://media.npr.org/assets/img/2023/06/29/upfirst_podcasttile_sq-86a4f80ac5712ad0374d783b617c6097785f4c4a.jpg',
+    url: 'https://www.npr.org/podcasts/510318/up-first',
   },
 ];
 
@@ -102,44 +102,46 @@ const featuredSeries = [
 
 const latestEpisodes = [
   {
-    show: 'Short Wave',
-    title: 'The James Webb telescope spots the universe’s earliest galaxy cluster',
+    show: 'The Daily',
+    title: 'How the Supreme Court reshaped immigration enforcement',
     summary:
-      'Astrophysicist Dr. Haojing Yan joins NPR to unpack the light signatures helping researchers map the first billion years.',
-    runtime: '14 min',
-    releaseDate: 'May 6, 2024',
-    url: 'https://www.npr.org/2024/05/06/1249441471/james-webb-earliest-galaxy-cluster',
-    image: 'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
+      'The New York Times legal reporters unpack the justices’ latest ruling and how it affects cases on the ground.',
+    runtime: '24 min',
+    releaseDate: 'June 25, 2024',
+    url: 'https://www.nytimes.com/2024/06/25/podcasts/the-daily-immigration-supreme-court.html',
+    image:
+      'https://static01.nyt.com/images/2019/05/01/podcasts/the-daily-album-art/the-daily-album-art-superJumbo-v3.jpg',
+  },
+  {
+    show: 'Today, Explained',
+    title: 'The chips war goes global',
+    summary:
+      'Vox’s tech team explains the race to control semiconductor supply chains — and what it means for AI and geopolitics.',
+    runtime: '27 min',
+    releaseDate: 'June 24, 2024',
+    url: 'https://www.vox.com/podcasts/2024/06/24/24184039/today-explained-ai-chips-trade-war',
+    image:
+      'https://content.production.cdn.art19.com/images/28/74/21/28742151-9daa-4f5c-a0a9-0f72e0c127fd/6d686293-9490-11e8-bb7a-b7f3b9a3c6b9/TodayExplained2024.jpg',
   },
   {
     show: 'Science Vs',
-    title: 'Can geothermal energy scale fast enough to power cities?',
+    title: 'PFAS: The fight to clean up forever chemicals',
     summary:
-      'Host Wendy Zukerman and a panel of geothermal engineers explore the tech leaps and policy tools accelerating the sector.',
-    runtime: '38 min',
-    releaseDate: 'May 2, 2024',
-    url: 'https://open.spotify.com/episode/6cJzypYtR2kWWe5qzb6MhI',
+      'Host Wendy Zukerman digs into the lawsuits, research, and regulation surrounding PFAS contamination.',
+    runtime: '39 min',
+    releaseDate: 'June 13, 2024',
+    url: 'https://open.spotify.com/episode/3S2p3e43B76zMZhg4xD8cW',
     image: 'https://i.scdn.co/image/ab6765630000ba8a0c606b3316d0e6f2fa14de3f',
   },
   {
-    show: 'Radiolab',
-    title: 'The microbiome mission',
+    show: 'Short Wave',
+    title: 'What record ocean heat means for hurricane season',
     summary:
-      'A journey through stool banks, lab breakthroughs, and why microbial diversity is reshaping modern medicine.',
-    runtime: '55 min',
-    releaseDate: 'April 26, 2024',
-    url: 'https://radiolab.org/podcast/microbiome-mission',
-    image: 'https://media.wnyc.org/i/1200/900/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
-  },
-  {
-    show: "NASA's Curious Universe",
-    title: 'How Artemis astronauts train underwater',
-    summary:
-      'Dive into NASA’s Neutral Buoyancy Laboratory to see how crews rehearse moonwalks in a 6.2-million-gallon pool.',
-    runtime: '33 min',
-    releaseDate: 'April 16, 2024',
-    url: 'https://www.nasa.gov/podcasts/curious-universe/how-artemis-astronauts-train-underwater/',
-    image: 'https://www.nasa.gov/wp-content/uploads/2020/06/curious-universe-podcast.jpg',
+      'NPR climate correspondents translate the science behind warming seas and the forecasts for the months ahead.',
+    runtime: '13 min',
+    releaseDate: 'June 20, 2024',
+    url: 'https://www.npr.org/2024/06/20/1177471578/hurricane-season-ocean-heat-short-wave',
+    image: 'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
   },
 ];
 
@@ -148,19 +150,19 @@ const listeningLabs = [
     title: 'Climate solutions lab',
     description:
       'Zero in on decarbonization breakthroughs, frontline adaptation strategies, and the innovators leading the charge.',
-    shows: ['How to Save a Planet', 'The Climate Question', 'Volts'],
+    shows: ['The Climate Question', 'The Carbon Copy', 'Volts'],
   },
   {
     title: 'Spacefaring futures',
     description:
       'Track missions to the Moon, Mars, and exoplanets with audio briefings direct from NASA, ESA, and private launch teams.',
-    shows: ["NASA's Curious Universe", 'Orbital Path', 'ESA Explorer'],
+    shows: ["NASA's Curious Universe", 'Today In Space', 'Are We There Yet?'],
   },
   {
     title: 'Bio frontier briefings',
     description:
       'Follow CRISPR breakthroughs, microbiome therapeutics, and neuroscience advances shaping the next decade of health.',
-    shows: ['Radiolab', 'Invisibilia', 'Big Biology'],
+    shows: ['Short Wave', 'Science Vs', 'Big Biology'],
   },
 ];
 

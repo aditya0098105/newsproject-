@@ -1,12 +1,13 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Video, ResizeMode } from 'expo-av';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { isStreamingUrl, resolveVideoSource } from '@/utils/media';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { isLikelyVideoUrl, isStreamingUrl, resolveVideoSource } from '@/utils/media';
 
 type ArticleSearchParams = {
   articleId?: string;
@@ -76,8 +77,28 @@ export default function ArticleDetailsScreen() {
     return 'Article';
   }, [params.source]);
 
+  const hasArticleUrl = typeof params.url === 'string' && params.url.trim().length > 0;
   const videoSource = useMemo(() => resolveVideoSource(params.url), [params.url]);
+  const canPlayVideo = hasArticleUrl && isLikelyVideoUrl(params.url);
   const isStreaming = isStreamingUrl(params.url);
+
+  const handleOpenArticle = useCallback(async () => {
+    if (!hasArticleUrl || typeof params.url !== 'string') {
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(params.url);
+      if (!supported) {
+        Alert.alert('Unable to open link', 'Try copying the article URL and opening it in your browser.');
+        return;
+      }
+
+      await Linking.openURL(params.url);
+    } catch {
+      Alert.alert('Something went wrong', 'We could not launch the article link.');
+    }
+  }, [hasArticleUrl, params.url]);
 
   return (
     <ThemedView style={styles.container}>
@@ -97,24 +118,53 @@ export default function ArticleDetailsScreen() {
           )}
           <ThemedText style={styles.description}>{articleBody}</ThemedText>
         </View>
-        {videoSource && (
+        {hasArticleUrl && (
           <View style={styles.videoSection}>
             <ThemedText type="subtitle" style={styles.videoHeading}>
               Watch the briefing
             </ThemedText>
-            <View style={styles.videoWrapper}>
-              <Video
-                key={params.articleId ?? 'article-video'}
-                style={styles.video}
-                source={videoSource}
-                resizeMode={ResizeMode.CONTAIN}
-                useNativeControls
-                shouldPlay={false}
-              />
-            </View>
-            <ThemedText style={styles.videoMeta}>
-              {isStreaming ? 'Streaming from source link.' : 'Playing from local file path.'}
-            </ThemedText>
+            {canPlayVideo && videoSource ? (
+              <>
+                <View style={styles.videoWrapper}>
+                  <Video
+                    key={params.articleId ?? 'article-video'}
+                    style={styles.video}
+                    source={videoSource}
+                    resizeMode={ResizeMode.CONTAIN}
+                    useNativeControls
+                    shouldPlay={false}
+                  />
+                </View>
+                <ThemedText style={styles.videoMeta}>
+                  {isStreaming ? 'Streaming from source link.' : 'Playing from local file path.'}
+                </ThemedText>
+              </>
+            ) : (
+              <>
+                <ThemedView
+                  style={styles.videoFallback}
+                  lightColor="rgba(59, 130, 246, 0.12)"
+                  darkColor="rgba(37, 99, 235, 0.24)"
+                >
+                  <ThemedText type="defaultSemiBold" style={styles.videoFallbackTitle}>
+                    No video briefing available
+                  </ThemedText>
+                  <ThemedText style={styles.videoFallbackDescription}>
+                    This headline doesn’t include an embedded video. Jump to the publisher to read and watch their full
+                    coverage.
+                  </ThemedText>
+                  <Pressable onPress={handleOpenArticle} style={({ pressed }) => [styles.videoButton, pressed && styles.videoButtonPressed]}>
+                    <ThemedText type="defaultSemiBold" style={styles.videoButtonLabel} lightColor="#ffffff" darkColor="#ffffff">
+                      Open full article
+                    </ThemedText>
+                    <IconSymbol name="safari.fill" size={18} color="#ffffff" />
+                  </Pressable>
+                </ThemedView>
+                <ThemedText style={styles.videoMeta}>
+                  We’ll launch the story in your browser so you can watch the publisher’s briefing.
+                </ThemedText>
+              </>
+            )}
           </View>
         )}
       </ScrollView>
@@ -176,6 +226,36 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     aspectRatio: 16 / 9,
+  },
+  videoFallback: {
+    borderRadius: 16,
+    padding: 20,
+    gap: 12,
+    backgroundColor: 'rgba(30, 64, 175, 0.08)',
+  },
+  videoFallbackTitle: {
+    fontSize: 18,
+  },
+  videoFallbackDescription: {
+    fontSize: 15,
+    lineHeight: 22,
+    opacity: 0.85,
+  },
+  videoButton: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 999,
+    backgroundColor: '#1d4ed8',
+  },
+  videoButtonPressed: {
+    opacity: 0.85,
+  },
+  videoButtonLabel: {
+    fontSize: 16,
   },
   videoMeta: {
     fontSize: 14,
