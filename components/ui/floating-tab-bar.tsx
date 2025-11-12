@@ -1,10 +1,9 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { PlatformPressable } from '@react-navigation/elements';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import type { PressableStateCallbackType } from 'react-native';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -19,11 +18,6 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
   const {
     preferences: { hapticFeedback },
   } = usePreferences();
-  const tabBarGradient =
-    colorScheme === 'dark'
-      ? (['rgba(15, 23, 42, 0.94)', 'rgba(30, 41, 59, 0.9)'] as const)
-      : (['rgba(255, 255, 255, 0.96)', 'rgba(248, 250, 252, 0.94)'] as const);
-
   const tabButtonStyle = ({ pressed }: PressableStateCallbackType) => [
     styles.tabButton,
     pressed ? styles.tabButtonPressed : null,
@@ -39,84 +33,75 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           paddingHorizontal: 20,
         },
       ]}>
-      <LinearGradient colors={tabBarGradient} style={[styles.tabBar, { borderColor: palette.stroke }]}>
-        {state.routes.map((route, index) => {
-          const { options } = descriptors[route.key];
-          const label =
-            typeof options.tabBarLabel === 'string'
-              ? options.tabBarLabel
-              : options.title ?? route.name;
-          const isFocused = state.index === index;
-          const iconColor = isFocused ? '#ffffff' : palette.tabIconDefault;
+      <View
+        style={[
+          styles.tabBar,
+          { backgroundColor: palette.card, borderColor: palette.stroke },
+        ]}
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabBarContent}
+        >
+          {state.routes.map((route, index) => {
+            const { options } = descriptors[route.key];
+            const label =
+              typeof options.tabBarLabel === 'string'
+                ? options.tabBarLabel
+                : options.title ?? route.name;
+            const isFocused = state.index === index;
+            const iconColor = isFocused ? '#ffffff' : palette.tabIconDefault;
 
-          const onPress = () => {
-            if (hapticFeedback && process.env.EXPO_OS === 'ios') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-            }
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
+            const onPress = () => {
+              if (hapticFeedback && process.env.EXPO_OS === 'ios') {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              }
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              });
 
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate({ name: route.name, merge: true } as never);
-            }
-          };
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate({ name: route.name, merge: true } as never);
+              }
+            };
 
-          const onLongPress = () => {
-            navigation.emit({
-              type: 'tabLongPress',
-              target: route.key,
-            });
-          };
+            const onLongPress = () => {
+              navigation.emit({
+                type: 'tabLongPress',
+                target: route.key,
+              });
+            };
 
-          const icon =
-            options.tabBarIcon?.({
-              focused: isFocused,
-              color: iconColor,
-              size: 24,
-            }) ?? null;
+            const icon =
+              options.tabBarIcon?.({
+                focused: isFocused,
+                color: iconColor,
+                size: 24,
+              }) ?? null;
 
-          return (
-            <PlatformPressable
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={tabButtonStyle}
-            >
-              {isFocused ? (
-                <LinearGradient
-                  colors={palette.gradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.tabButtonActive}
-                >
-                  <View style={styles.tabContent}>
-                    <View style={styles.iconContainer}>{icon}</View>
-                    <ThemedText
-                      numberOfLines={1}
-                      style={styles.tabLabel}
-                      lightColor="#ffffff"
-                      darkColor="#ffffff"
-                      type="defaultSemiBold"
-                    >
-                      {label}
-                    </ThemedText>
-                  </View>
-                </LinearGradient>
-              ) : (
+            return (
+              <PlatformPressable
+                key={route.key}
+                accessibilityRole="button"
+                accessibilityState={isFocused ? { selected: true } : {}}
+                accessibilityLabel={options.tabBarAccessibilityLabel}
+                onPress={onPress}
+                onLongPress={onLongPress}
+                style={tabButtonStyle}
+              >
                 <View
                   style={[
-                    styles.tabButtonInactive,
+                    styles.tabContentWrapper,
                     {
-                      backgroundColor:
-                        colorScheme === 'dark'
-                          ? 'rgba(148, 163, 184, 0.16)'
-                          : 'rgba(148, 163, 184, 0.12)',
+                      backgroundColor: isFocused
+                        ? palette.tint
+                        : colorScheme === 'dark'
+                          ? 'rgba(148, 163, 184, 0.12)'
+                          : 'rgba(148, 163, 184, 0.1)',
+                      borderColor: isFocused ? 'transparent' : palette.stroke,
                     },
                   ]}
                 >
@@ -124,19 +109,21 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
                     <View style={styles.iconContainer}>{icon}</View>
                     <ThemedText
                       numberOfLines={1}
-                      style={styles.tabLabel}
-                      lightColor={palette.tabIconDefault}
-                      darkColor={palette.tabIconDefault}
+                      style={[
+                        styles.tabLabel,
+                        { color: isFocused ? '#ffffff' : palette.tabIconDefault },
+                      ]}
+                      type="defaultSemiBold"
                     >
                       {label}
                     </ThemedText>
                   </View>
                 </View>
-              )}
-            </PlatformPressable>
-          );
-        })}
-      </LinearGradient>
+              </PlatformPressable>
+            );
+          })}
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -149,35 +136,33 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   tabBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    borderRadius: 28,
+    overflow: 'hidden',
+    borderRadius: 24,
     padding: 12,
     borderWidth: 1,
     shadowColor: '#0f172a',
-    shadowOpacity: 0.14,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 12,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  tabBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 4,
   },
   tabButton: {
-    flex: 1,
     borderRadius: 20,
+    marginHorizontal: 6,
   },
   tabButtonPressed: {
     transform: [{ scale: 0.97 }],
   },
-  tabButtonActive: {
+  tabContentWrapper: {
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 12,
-  },
-  tabButtonInactive: {
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderWidth: 1,
   },
   tabContent: {
     flexDirection: 'row',
