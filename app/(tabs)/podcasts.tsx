@@ -13,14 +13,44 @@ import {
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+import { IconSymbol, type IconSymbolName } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-const heroHighlights = [
-  { label: 'Curated science shows', value: '8 programs' },
-  { label: 'Fresh episodes tracked', value: '24 this week' },
-  { label: 'Runtime library', value: '38 hr 12 min' },
+type HeroHighlight = {
+  label: string;
+  value: string;
+  icon: IconSymbolName;
+};
+
+const heroHighlights: HeroHighlight[] = [
+  { label: 'Curated science shows', value: '8 programs', icon: 'rectangle.stack.fill' },
+  { label: 'Fresh episodes tracked', value: '24 this week', icon: 'waveform.path.ecg' },
+  { label: 'Runtime library', value: '38 hr 12 min', icon: 'clock.fill' },
+];
+
+const quickSpotlights = [
+  {
+    title: 'Deep Space Debriefs',
+    description: 'High-altitude news packages from NASA, ESA, and SpaceX mission rooms.',
+    image:
+      'https://images.unsplash.com/photo-1581091870622-3d5a19c9af1a?auto=format&fit=crop&w=1400&q=80',
+    url: 'https://www.nasa.gov/podcasts/',
+  },
+  {
+    title: 'Climate Solutions Daily',
+    description: 'Dispatches on adaptation finance, grid innovation, and frontline resilience.',
+    image:
+      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
+    url: 'https://www.theguardian.com/environment/climate-crisis',
+  },
+  {
+    title: 'BioFrontier Notebook',
+    description: 'Microbiome therapeutics, CRISPR leaps, and translational lab reports.',
+    image:
+      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1400&q=80',
+    url: 'https://www.nature.com/subjects/biotechnology/podcast',
+  },
 ];
 
 const featuredSeries = [
@@ -79,6 +109,7 @@ const latestEpisodes = [
     runtime: '14 min',
     releaseDate: 'May 6, 2024',
     url: 'https://www.npr.org/2024/05/06/1249441471/james-webb-earliest-galaxy-cluster',
+    image: 'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
   },
   {
     show: 'Science Vs',
@@ -88,6 +119,7 @@ const latestEpisodes = [
     runtime: '38 min',
     releaseDate: 'May 2, 2024',
     url: 'https://open.spotify.com/episode/6cJzypYtR2kWWe5qzb6MhI',
+    image: 'https://i.scdn.co/image/ab6765630000ba8a0c606b3316d0e6f2fa14de3f',
   },
   {
     show: 'Radiolab',
@@ -97,6 +129,7 @@ const latestEpisodes = [
     runtime: '55 min',
     releaseDate: 'April 26, 2024',
     url: 'https://radiolab.org/podcast/microbiome-mission',
+    image: 'https://media.wnyc.org/i/1200/900/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
   },
   {
     show: "NASA's Curious Universe",
@@ -106,6 +139,7 @@ const latestEpisodes = [
     runtime: '33 min',
     releaseDate: 'April 16, 2024',
     url: 'https://www.nasa.gov/podcasts/curious-universe/how-artemis-astronauts-train-underwater/',
+    image: 'https://www.nasa.gov/wp-content/uploads/2020/06/curious-universe-podcast.jpg',
   },
 ];
 
@@ -169,10 +203,13 @@ export default function PodcastsScreen() {
         style={styles.heroShell}
       >
         <View style={[styles.heroContent, { backgroundColor: heroOverlay }] }>
+          <View pointerEvents="none" style={styles.heroGlowOne} />
+          <View pointerEvents="none" style={styles.heroGlowTwo} />
+
           <View style={styles.heroHeader}>
             <View style={styles.heroIconWrap}>
-              <LinearGradient
-                colors={palette.gradient ?? [palette.tint, palette.accent]}
+                <LinearGradient
+                  colors={palette.gradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.heroIconGradient}
@@ -200,6 +237,14 @@ export default function PodcastsScreen() {
                 lightColor={cardSurface}
                 darkColor={cardSurface}
               >
+                <LinearGradient
+                  colors={palette.secondaryGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.heroStatIconBadge}
+                >
+                  <IconSymbol name={item.icon} size={18} color="#ffffff" />
+                </LinearGradient>
                 <ThemedText type="subtitle" style={styles.heroStatValue} lightColor={textStrong} darkColor={textStrong}>
                   {item.value}
                 </ThemedText>
@@ -209,6 +254,53 @@ export default function PodcastsScreen() {
           </View>
         </View>
       </LinearGradient>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <IconSymbol name="sparkles" size={18} color={palette.tint} />
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Signal boosters
+          </ThemedText>
+        </View>
+        <ThemedText style={styles.sectionDescription}>
+          Rotate through the news desk’s daily listening prompts – quick-hit playlists that surface the most urgent science and
+          technology briefings in your feed.
+        </ThemedText>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.spotlightRail}
+        >
+          {quickSpotlights.map((spotlight) => (
+            <Pressable
+              key={spotlight.title}
+              onPress={() => handleOpenLink(spotlight.url)}
+              style={({ pressed }) => [styles.spotlightCard, pressed && styles.spotlightCardPressed]}
+            >
+              <Image source={{ uri: spotlight.image }} style={styles.spotlightImage} contentFit="cover" />
+              <LinearGradient
+                colors={['rgba(15, 23, 42, 0.1)', 'rgba(15, 23, 42, 0.65)']}
+                style={styles.spotlightOverlay}
+              />
+              <View style={styles.spotlightInner}>
+                <View style={styles.spotlightBadge}>
+                  <IconSymbol name="play.circle.fill" size={20} color="#ffffff" />
+                  <ThemedText style={styles.spotlightBadgeLabel} lightColor="#ffffff" darkColor="#ffffff">
+                    Press play
+                  </ThemedText>
+                </View>
+                <ThemedText type="subtitle" style={styles.spotlightTitle} lightColor="#ffffff" darkColor="#ffffff">
+                  {spotlight.title}
+                </ThemedText>
+                <ThemedText style={styles.spotlightDescription} lightColor="rgba(248,250,252,0.85)" darkColor="rgba(248,250,252,0.85)">
+                  {spotlight.description}
+                </ThemedText>
+              </View>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -230,7 +322,16 @@ export default function PodcastsScreen() {
               lightColor={cardSurface}
               darkColor={cardSurface}
             >
-              <Image source={{ uri: series.image }} style={styles.seriesArt} contentFit="cover" />
+              <View style={styles.seriesArtWrap}>
+                <Image source={{ uri: series.image }} style={styles.seriesArt} contentFit="cover" />
+                <LinearGradient
+                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.55)']}
+                  style={styles.seriesArtOverlay}
+                />
+                <View style={styles.seriesArtBadge}>
+                  <IconSymbol name="play.circle.fill" size={24} color="#ffffff" />
+                </View>
+              </View>
               <View style={styles.seriesBody}>
                 <ThemedText type="subtitle" style={styles.seriesTitle}>
                   {series.title}
@@ -258,7 +359,7 @@ export default function PodcastsScreen() {
 
               <Pressable onPress={() => handleOpenLink(series.url)} style={styles.seriesButton}>
                 <LinearGradient
-                  colors={palette.gradient ?? [palette.tint, palette.accent]}
+                  colors={palette.gradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.seriesButtonGradient}
@@ -297,27 +398,42 @@ export default function PodcastsScreen() {
               lightColor={cardSurface}
               darkColor={cardSurface}
             >
-              <View style={styles.episodeHeader}>
-                <ThemedText type="defaultSemiBold" style={styles.episodeShow}>
-                  {episode.show}
-                </ThemedText>
-                <ThemedText style={styles.episodeMeta}>{episode.releaseDate}</ThemedText>
+              <View style={styles.episodeArtWrap}>
+                <Image source={{ uri: episode.image }} style={styles.episodeArt} contentFit="cover" />
+                <LinearGradient
+                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.7)']}
+                  style={styles.episodeArtOverlay}
+                />
               </View>
-              <ThemedText type="subtitle" style={styles.episodeTitle}>
-                {episode.title}
-              </ThemedText>
-              <ThemedText style={styles.episodeSummary}>{episode.summary}</ThemedText>
 
-              <View style={styles.episodeFooter}>
-                <View style={[styles.metaBadge, { backgroundColor: softSurface }]}>
-                  <ThemedText style={styles.metaBadgeLabel}>{episode.runtime}</ThemedText>
-                </View>
-                <Pressable onPress={() => handleOpenLink(episode.url)} style={styles.episodeLink}>
-                  <ThemedText type="defaultSemiBold" style={styles.episodeLinkLabel} lightColor={palette.tint} darkColor={palette.tint}>
-                    Stream episode
+              <View style={styles.episodeBody}>
+                <View style={styles.episodeHeader}>
+                  <ThemedText type="defaultSemiBold" style={styles.episodeShow}>
+                    {episode.show}
                   </ThemedText>
-                  <IconSymbol name="chevron.right" size={16} color={palette.tint} />
-                </Pressable>
+                  <ThemedText style={styles.episodeMeta}>{episode.releaseDate}</ThemedText>
+                </View>
+                <ThemedText type="subtitle" style={styles.episodeTitle}>
+                  {episode.title}
+                </ThemedText>
+                <ThemedText style={styles.episodeSummary}>{episode.summary}</ThemedText>
+
+                <View style={styles.episodeFooter}>
+                  <View style={[styles.metaBadge, { backgroundColor: softSurface }]}>
+                    <ThemedText style={styles.metaBadgeLabel}>{episode.runtime}</ThemedText>
+                  </View>
+                  <Pressable onPress={() => handleOpenLink(episode.url)} style={styles.episodeLink}>
+                    <ThemedText
+                      type="defaultSemiBold"
+                      style={styles.episodeLinkLabel}
+                      lightColor={palette.tint}
+                      darkColor={palette.tint}
+                    >
+                      Stream episode
+                    </ThemedText>
+                    <IconSymbol name="chevron.right" size={16} color={palette.tint} />
+                  </Pressable>
+                </View>
               </View>
             </ThemedView>
           ))}
@@ -375,6 +491,9 @@ const styles = StyleSheet.create({
   heroContent: {
     padding: 24,
     gap: 20,
+    borderRadius: 28,
+    position: 'relative',
+    overflow: 'hidden',
   },
   heroHeader: {
     gap: 16,
@@ -416,7 +535,14 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    gap: 8,
+    gap: 12,
+  },
+  heroStatIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   heroStatValue: {
     fontSize: 24,
@@ -444,6 +570,54 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: 'rgba(100, 116, 139, 1)',
   },
+  spotlightRail: {
+    gap: 16,
+    paddingVertical: 4,
+    paddingRight: 12,
+  },
+  spotlightCard: {
+    width: 280,
+    height: 220,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  spotlightCardPressed: {
+    transform: [{ scale: 0.98 }],
+  },
+  spotlightImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  spotlightOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  spotlightInner: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 18,
+    gap: 8,
+  },
+  spotlightBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    borderRadius: 999,
+  },
+  spotlightBadgeLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  spotlightTitle: {
+    fontSize: 20,
+    lineHeight: 26,
+  },
+  spotlightDescription: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
   seriesGrid: {
     gap: 20,
   },
@@ -453,9 +627,27 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     gap: 0,
   },
+  seriesArtWrap: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
   seriesArt: {
     width: '100%',
     height: 200,
+  },
+  seriesArtOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  seriesArtBadge: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   seriesBody: {
     padding: 20,
@@ -521,14 +713,31 @@ const styles = StyleSheet.create({
   episodeScroller: {
     paddingRight: 8,
     gap: 16,
+    paddingVertical: 4,
   },
   episodeCard: {
-    width: 280,
+    width: 300,
     borderRadius: 24,
     borderWidth: 1,
+    overflow: 'hidden',
+    gap: 0,
+    marginRight: 16,
+  },
+  episodeArtWrap: {
+    height: 160,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  episodeArt: {
+    width: '100%',
+    height: '100%',
+  },
+  episodeArtOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  episodeBody: {
     padding: 20,
     gap: 12,
-    marginRight: 16,
   },
   episodeHeader: {
     flexDirection: 'row',
@@ -555,6 +764,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 4,
   },
   episodeLink: {
     flexDirection: 'row',
@@ -595,5 +805,25 @@ const styles = StyleSheet.create({
   labShowLabel: {
     fontSize: 13,
     lineHeight: 18,
+  },
+  heroGlowOne: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(99, 102, 241, 0.25)',
+    top: -60,
+    right: -40,
+    transform: [{ rotate: '18deg' }],
+  },
+  heroGlowTwo: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(20, 184, 166, 0.18)',
+    bottom: -40,
+    left: -50,
+    transform: [{ rotate: '-22deg' }],
   },
 });
