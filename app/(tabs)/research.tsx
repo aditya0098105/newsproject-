@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
@@ -194,12 +195,35 @@ export default function ResearchScreen() {
   const softSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.6)' : 'rgba(241, 245, 249, 0.65)';
   const divider = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.25)' : 'rgba(15, 23, 42, 0.08)';
   const accentText = colorScheme === 'dark' ? '#f8fafc' : '#0f172a';
+  const heroHighlightSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.45)' : 'rgba(248, 250, 252, 0.28)';
+  const heroHighlightBorder = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.32)' : 'rgba(248, 250, 252, 0.6)';
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#0f172a', dark: '#020617' }}
       headerImage={
-        <LinearGradient colors={palette.gradient} style={styles.heroGradient}>
+        <View style={styles.heroContainer}>
+          <Image
+            source={{
+              uri: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',
+            }}
+            style={styles.heroBackground}
+            contentFit="cover"
+          />
+          <LinearGradient
+            colors={palette.secondaryGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroBackdrop}
+          />
+          <LinearGradient
+            colors={['rgba(15, 23, 42, 0.2)', 'rgba(15, 23, 42, 0.85)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.heroScrim}
+          />
+          <View pointerEvents="none" style={styles.heroDecorOrb} />
+          <View pointerEvents="none" style={styles.heroDecorBar} />
           <View style={styles.heroOverlay}>
             <ThemedText
               style={styles.heroEyebrow}
@@ -219,7 +243,10 @@ export default function ResearchScreen() {
             </ThemedText>
             <View style={styles.heroHighlightsRow}>
               {highlightStats.map((item) => (
-                <View key={item.label} style={styles.heroHighlight}>
+                <View
+                  key={item.label}
+                  style={[styles.heroHighlight, { backgroundColor: heroHighlightSurface, borderColor: heroHighlightBorder }]}
+                >
                   <ThemedText style={styles.heroHighlightValue} lightColor="#f8fafc" darkColor="#f8fafc">
                     {item.value}
                   </ThemedText>
@@ -239,7 +266,7 @@ export default function ResearchScreen() {
               ))}
             </View>
           </View>
-        </LinearGradient>
+        </View>
       }>
       <ThemedView
         style={[styles.section, styles.visionCard, { borderColor: divider }]}
@@ -388,13 +415,45 @@ export default function ResearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  heroGradient: {
+  heroContainer: {
+    flex: 1,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
+  },
+  heroBackground: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroScrim: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroOverlay: {
     flex: 1,
     padding: 32,
     justifyContent: 'flex-end',
+    gap: 20,
   },
-  heroOverlay: {
-    gap: 16,
+  heroDecorOrb: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(148, 163, 184, 0.25)',
+    top: -60,
+    right: -80,
+  },
+  heroDecorBar: {
+    position: 'absolute',
+    width: 260,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    bottom: 40,
+    left: -80,
+    transform: [{ rotate: '-12deg' }],
   },
   heroEyebrow: {
     fontSize: 16,
@@ -414,10 +473,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 24,
     flexWrap: 'wrap',
+    marginTop: 12,
   },
   heroHighlight: {
     maxWidth: 240,
-    gap: 4,
+    gap: 6,
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   heroHighlightValue: {
     fontSize: 28,

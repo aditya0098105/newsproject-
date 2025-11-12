@@ -28,8 +28,8 @@ export const Colors = {
     card: elevatedSurfaceLight,
     muted: '#64748b',
     stroke: subtleStrokeLight,
-    gradient: ['#6366f1', '#14b8a6'],
-    secondaryGradient: ['#38bdf8', '#ec4899'],
+    gradient: ['#6366f1', '#14b8a6'] as const,
+    secondaryGradient: ['#38bdf8', '#ec4899'] as const,
   },
   dark: {
     text: '#e2e8f0',
@@ -42,8 +42,8 @@ export const Colors = {
     card: elevatedSurfaceDark,
     muted: '#94a3b8',
     stroke: subtleStrokeDark,
-    gradient: ['#4c1d95', '#0f766e'],
-    secondaryGradient: ['#0ea5e9', '#ec4899'],
+    gradient: ['#4c1d95', '#0f766e'] as const,
+    secondaryGradient: ['#0ea5e9', '#ec4899'] as const,
   },
 };
 
