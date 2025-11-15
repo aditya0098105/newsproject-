@@ -222,23 +222,46 @@ export default function HomeScreen() {
           <Pressable
             key={action.title}
             onPress={() => router.push(action.route)}
-            style={[styles.quickCard, { borderColor: borderSubtle, backgroundColor: highlightSurface }]}
+            style={({ pressed }) => [
+              styles.quickCard,
+              {
+                borderColor: borderSubtle,
+                backgroundColor: highlightSurface,
+                shadowColor: palette.tint,
+              },
+              pressed && styles.quickCardPressed,
+            ]}
           >
             <LinearGradient
               colors={palette.gradient ?? [palette.tint, palette.accent]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.quickIconWrap}
-            >
-              <IconSymbol name={action.icon as ComponentProps<typeof IconSymbol>['name']} size={22} color="#ffffff" />
-            </LinearGradient>
+              style={styles.quickBackdrop}
+              pointerEvents="none"
+            />
+            <View style={styles.quickHeaderRow}>
+              <LinearGradient
+                colors={palette.secondaryGradient ?? [palette.tint, palette.accent]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.quickIconWrap}
+              >
+                <IconSymbol name={action.icon as ComponentProps<typeof IconSymbol>['name']} size={20} color="#ffffff" />
+              </LinearGradient>
+              <ThemedView
+                lightColor="rgba(248, 250, 252, 0.9)"
+                darkColor="rgba(15, 23, 42, 0.92)"
+                style={styles.quickArrowBadge}
+              >
+                <IconSymbol name="arrow.up.right" size={16} color={palette.tint} />
+              </ThemedView>
+            </View>
             <View style={styles.quickContent}>
               <ThemedText type="subtitle" style={styles.quickTitle}>
                 {action.title}
               </ThemedText>
               <ThemedText style={styles.quickSubtitle}>{action.subtitle}</ThemedText>
             </View>
-            <IconSymbol name="arrow.right" size={18} color={palette.tint} />
           </Pressable>
         ))}
       </View>
@@ -622,33 +645,66 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   quickGrid: {
-    flexDirection: 'column',
-    gap: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   quickCard: {
     borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 18,
+    width: '48%',
+    minWidth: 160,
+    overflow: 'hidden',
+    position: 'relative',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 4,
+    marginBottom: 16,
+  },
+  quickCardPressed: {
+    transform: [{ translateY: 2 }],
+    opacity: 0.92,
+  },
+  quickBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.14,
+    borderRadius: 20,
+  },
+  quickHeaderRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 14,
+    marginBottom: 16,
   },
   quickIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  quickArrowBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+    alignSelf: 'flex-start',
+  },
   quickContent: {
-    flex: 1,
-    gap: 2,
+    gap: 6,
   },
   quickTitle: {
-    fontSize: 17,
+    fontSize: 18,
   },
   quickSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 20,
     opacity: 0.75,
   },
   documentaryCarousel: {
