@@ -335,10 +335,25 @@ export default function PodcastsScreen() {
                 </View>
               </View>
               <View style={styles.seriesBody}>
-                <ThemedText type="subtitle" style={styles.seriesTitle}>
-                  {series.title}
-                </ThemedText>
-                <ThemedText style={styles.seriesPublisher}>{series.publisher}</ThemedText>
+                <View style={styles.seriesHeadingRow}>
+                  <LinearGradient
+                    colors={palette.secondaryGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.seriesAvatarHalo}
+                  >
+                    <View style={styles.seriesAvatarInner}>
+                      <Image source={{ uri: series.image }} style={styles.seriesAvatarImage} contentFit="cover" />
+                    </View>
+                  </LinearGradient>
+
+                  <View style={styles.seriesHeadingCopy}>
+                    <ThemedText type="subtitle" style={styles.seriesTitle}>
+                      {series.title}
+                    </ThemedText>
+                    <ThemedText style={styles.seriesPublisher}>{series.publisher}</ThemedText>
+                  </View>
+                </View>
                 <ThemedText style={styles.seriesTagline}>{series.tagline}</ThemedText>
 
                 <View style={styles.seriesMeta}>
@@ -653,7 +668,16 @@ const styles = StyleSheet.create({
   },
   seriesBody: {
     padding: 20,
-    gap: 12,
+    gap: 16,
+  },
+  seriesHeadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  seriesHeadingCopy: {
+    flex: 1,
+    gap: 4,
   },
   seriesTitle: {
     fontSize: 22,
@@ -662,6 +686,21 @@ const styles = StyleSheet.create({
   seriesPublisher: {
     fontSize: 14,
     color: 'rgba(100, 116, 139, 1)',
+  },
+  seriesAvatarHalo: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    padding: 3,
+  },
+  seriesAvatarInner: {
+    flex: 1,
+    borderRadius: 17,
+    overflow: 'hidden',
+  },
+  seriesAvatarImage: {
+    width: '100%',
+    height: '100%',
   },
   seriesTagline: {
     fontSize: 16,
