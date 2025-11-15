@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 import { Image } from 'expo-image';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -18,6 +18,24 @@ import {
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+const heroHeadlines = [
+  {
+    title: 'Global Affairs Index',
+    summary:
+      'Precision reporting, cinematic storytelling, and actionable briefings for decision-makers navigating volatile civic landscapes.',
+  },
+  {
+    title: 'Clean Manufacturing Accord',
+    summary:
+      'Citizen councils and ministers codify emission thresholds while intelligence analysts surface verified data streams in real time.',
+  },
+  {
+    title: 'Community Resilience Pulse',
+    summary:
+      'Grassroots observers, climate labs, and municipal coalitions synchronize to deploy rapid relief where it matters most.',
+  },
+];
+
 const heroMetrics = [
   { label: 'Global correspondents', value: '118' },
   { label: 'Policy briefings / week', value: '42' },
@@ -26,46 +44,53 @@ const heroMetrics = [
 
 const quickActions = [
   {
-    title: 'Documentaries',
-    subtitle: 'Field films & trailers',
-    icon: 'film.fill',
-    route: '/documentaries',
-  },
-  {
     title: 'Current News',
     subtitle: 'Rolling solution headlines',
     icon: 'newspaper.fill',
     route: '/news',
-  },
-  {
-    title: 'Governance Index',
-    subtitle: '195-nation scoreboard',
-    icon: 'chart.bar.xaxis',
-    route: '/governance-index',
+    priority: 'primary',
   },
   {
     title: 'Protest Watch',
     subtitle: 'Movement dossiers',
     icon: 'megaphone.fill',
     route: '/protests',
-  },
-  {
-    title: 'Science Podcasts',
-    subtitle: 'Immersive mission audio',
-    icon: 'mic.fill',
-    route: '/(tabs)/podcasts',
-  },
-  {
-    title: 'Expose',
-    subtitle: 'Accountability spotlight',
-    icon: 'exclamationmark.triangle.fill',
-    route: '/(tabs)/expose',
+    priority: 'primary',
   },
   {
     title: 'Command Center',
     subtitle: 'Investor-grade controls',
     icon: 'slider.horizontal.3',
     route: '/(tabs)/command-center',
+    priority: 'primary',
+  },
+  {
+    title: 'Documentaries',
+    subtitle: 'Field films & trailers',
+    icon: 'film.fill',
+    route: '/documentaries',
+    priority: 'secondary',
+  },
+  {
+    title: 'Governance Index',
+    subtitle: '195-nation scoreboard',
+    icon: 'chart.bar.xaxis',
+    route: '/governance-index',
+    priority: 'secondary',
+  },
+  {
+    title: 'Science Podcasts',
+    subtitle: 'Immersive mission audio',
+    icon: 'mic.fill',
+    route: '/(tabs)/podcasts',
+    priority: 'secondary',
+  },
+  {
+    title: 'Expose',
+    subtitle: 'Accountability spotlight',
+    icon: 'exclamationmark.triangle.fill',
+    route: '/(tabs)/expose',
+    priority: 'secondary',
   },
 ];
 
@@ -100,7 +125,6 @@ export default function HomeScreen() {
   const highlightSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.72)' : palette.card ?? '#ffffff';
   const featureSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.85)' : '#0f172a';
   const panelSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.7)' : palette.card ?? '#ffffff';
-  const forwardSurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f6f7fb';
   const tintedSurface = colorScheme === 'dark' ? 'rgba(99, 102, 241, 0.28)' : 'rgba(99, 102, 241, 0.12)';
   const heroBadgeForeground = colorScheme === 'dark' ? '#f8fafc' : palette.background;
   const heroBadgeBackground = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.88)' : '#ffffff';
@@ -113,6 +137,13 @@ export default function HomeScreen() {
   const router = useRouter();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [activeHeadlineIndex, setActiveHeadlineIndex] = useState(0);
+  const activeHeadline = heroHeadlines[activeHeadlineIndex];
+  const primaryActions = quickActions.filter((action) => action.priority === 'primary');
+  const secondaryActions = quickActions.filter((action) => action.priority === 'secondary');
+  const bandSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
+  const bandAltSurface = colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.72)' : '#f5f7ff';
+  const tertiarySurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f1f5f9';
 
   const handleOpenDocumentary = useCallback(
     (slug: string) => {
@@ -159,10 +190,15 @@ export default function HomeScreen() {
         colors={colorScheme === 'dark' ? ['#111827', '#1f2937'] : ['#eef2ff', '#e0f2fe']}
         style={styles.heroShell}
       >
-        <View style={[styles.hero, { backgroundColor: heroBadgeBackground, borderColor: borderSubtle }] }>
-          <View style={styles.heroBanner}>
-            <View style={styles.heroBrandBlock}>
-              <TimelineLogo size={48} showWordmark stacked />
+        <View
+          style={[
+            styles.heroTopBanner,
+            { backgroundColor: heroBadgeBackground, borderColor: borderSubtle },
+          ]}
+        >
+          <View style={styles.heroBrandBlock}>
+            <TimelineLogo size={42} showWordmark stacked />
+            <View style={styles.heroBrandText}>
               <ThemedText
                 type="defaultSemiBold"
                 style={[styles.heroTagline, { color: heroBadgeForeground }]}
@@ -171,119 +207,192 @@ export default function HomeScreen() {
               >
                 Timeline Intelligence
               </ThemedText>
-            </View>
-            <View style={styles.heroCtaCluster}>
-              <ThemedText style={[styles.heroCtaLabel, { color: heroBadgeForeground }]}>Live brief</ThemedText>
-              <Pressable
-                onPress={() => router.push('/news')}
-                style={[styles.heroButton, { backgroundColor: heroBadgeForeground }]}
-              >
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.heroButtonLabel, { color: palette.tint }]}
-                  lightColor={palette.tint}
-                  darkColor={palette.tint}
-                >
-                  View headlines
-                </ThemedText>
-              </Pressable>
+              <ThemedText style={[styles.heroEyebrow, { color: heroBadgeForeground }]}>Global live brief</ThemedText>
             </View>
           </View>
-
-          <View style={styles.heroBody}>
-            <View style={styles.heroHeadlineGroup}>
-              <ThemedText type="title" style={styles.heroTitle}>
-                Global Affairs Index
-              </ThemedText>
-              <ThemedText style={styles.heroSubtitle}>
-                Precision reporting, cinematic storytelling, and actionable briefings for decision-makers navigating
-                volatile civic landscapes.
-              </ThemedText>
-            </View>
-
-            <ThemedView
-              lightColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15, 23, 42, 0.04)'}
-              darkColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15, 23, 42, 0.06)'}
-              style={[styles.heroSpotlight, { borderColor: borderSubtle }]}
+          <Pressable
+            onPress={() => router.push('/news')}
+            style={[styles.heroButton, { borderColor: palette.tint }]}
+          >
+            <View style={styles.heroButtonDot} />
+            <ThemedText
+              type="defaultSemiBold"
+              style={[styles.heroButtonLabel, { color: palette.tint }]}
+              lightColor={palette.tint}
+              darkColor={palette.tint}
             >
-              <View style={styles.heroSpotlightHeader}>
-                <IconSymbol name="sparkles" size={16} color={palette.tint} />
-                <ThemedText type="defaultSemiBold" style={styles.heroSpotlightTitle} lightColor={palette.tint} darkColor={palette.tint}>
-                  Tonight’s focus
-                </ThemedText>
-              </View>
-              <ThemedText style={styles.heroSpotlightCopy}>
-                Ministers convene in Nairobi to ratify the clean manufacturing compact while citizen councils stream
-                real-time oversight dashboards.
-              </ThemedText>
-            </ThemedView>
+              Live brief
+            </ThemedText>
+          </Pressable>
+        </View>
+
+        <ThemedView
+          lightColor={highlightSurface}
+          darkColor={highlightSurface}
+          style={[styles.heroMain, { borderColor: borderSubtle }]}
+        >
+          <View style={styles.heroHeadlineGroup}>
+            <ThemedText type="title" style={styles.heroTitle}>
+              {activeHeadline.title}
+            </ThemedText>
+            <ThemedText style={styles.heroSubtitle}>{activeHeadline.summary}</ThemedText>
           </View>
 
-          <View style={styles.metricPanel}>
-            {heroMetrics.map((metric) => (
-              <ThemedView
-                key={metric.label}
-                lightColor={highlightSurface}
-                darkColor={highlightSurface}
-                style={[styles.metricCard, { borderColor: borderSubtle }]}
-              >
-                <View style={styles.metricPill}>
-                  <LinearGradient
-                    colors={palette.secondaryGradient ?? [palette.tint, palette.accent]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.metricAccent}
+          <View style={styles.heroTabs}>
+            {heroHeadlines.map((headline, index) => {
+              const isActive = index === activeHeadlineIndex;
+
+              return (
+                <Pressable
+                  key={headline.title}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: isActive }}
+                  onPress={() => setActiveHeadlineIndex(index)}
+                  style={[
+                    styles.heroTab,
+                    { borderColor: borderSubtle },
+                    isActive && { backgroundColor: tintedSurface, borderColor: palette.tint },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.heroTabDot,
+                      { backgroundColor: isActive ? palette.tint : borderSubtle },
+                    ]}
                   />
-                  <ThemedText type="subtitle" style={styles.metricValue}>
-                    {metric.value}
+                  <ThemedText
+                    style={[
+                      styles.heroTabLabel,
+                      { color: isActive ? palette.tint : heroBadgeForeground },
+                    ]}
+                  >
+                    {`0${index + 1}`}
                   </ThemedText>
-                </View>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <ThemedView
+            lightColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(15, 23, 42, 0.04)'}
+            darkColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(15, 23, 42, 0.05)'}
+            style={[styles.heroSpotlight, { borderColor: borderSubtle }]}
+          >
+            <View style={styles.heroSpotlightHeader}>
+              <IconSymbol name="sparkles" size={16} color={palette.tint} />
+              <ThemedText type="defaultSemiBold" style={styles.heroSpotlightTitle} lightColor={palette.tint} darkColor={palette.tint}>
+                Tonight’s focus
+              </ThemedText>
+            </View>
+            <ThemedText style={styles.heroSpotlightCopy}>
+              Ministers convene in Nairobi to ratify the clean manufacturing compact while citizen councils stream real-time oversight dashboards.
+            </ThemedText>
+          </ThemedView>
+
+          <View style={[styles.metricBand, { borderColor: borderSubtle }]}>
+            {heroMetrics.map((metric, index) => (
+              <View
+                key={metric.label}
+                style={[
+                  styles.metricItem,
+                  index > 0 && { borderLeftColor: borderSubtle, borderLeftWidth: StyleSheet.hairlineWidth },
+                ]}
+              >
+                <ThemedText type="subtitle" style={styles.metricValue}>
+                  {metric.value}
+                </ThemedText>
                 <ThemedText style={styles.metricLabel}>{metric.label}</ThemedText>
-              </ThemedView>
+              </View>
             ))}
           </View>
-        </View>
+        </ThemedView>
       </LinearGradient>
 
-      <SectionHeader title="Quick launch" caption="Jump straight to live dashboards" icon="sparkles" />
-      <View style={styles.quickGrid}>
-        {quickActions.map((action) => (
+      <ThemedView
+        style={[styles.newsletterStrip, { borderColor: borderSubtle }]}
+        lightColor={tertiarySurface}
+        darkColor={tertiarySurface}
+      >
+        <View style={styles.newsletterIntro}>
+          <View style={styles.newsletterBadge}>
+            <IconSymbol name="envelope.open.fill" size={18} color={palette.tint} />
+          </View>
+          <View style={styles.newsletterCopy}>
+            <ThemedText type="subtitle" style={styles.newsletterTitle}>
+              Weekend intelligence brief
+            </ThemedText>
+            <ThemedText style={styles.newsletterSubtitle}>
+              Curated investigations and dispatch intel, ready for Sunday decision sessions.
+            </ThemedText>
+          </View>
+        </View>
+        <View style={styles.newsletterControls}>
+          <View style={styles.newsletterFieldset}>
+            <TextInput
+              value={newsletterEmail}
+              onChangeText={(value) => {
+                setNewsletterEmail(value);
+                if (newsletterStatus) {
+                  setNewsletterStatus(null);
+                }
+              }}
+              placeholder="you@example.com"
+              placeholderTextColor={colorScheme === 'dark' ? 'rgba(226,232,240,0.5)' : 'rgba(15,23,42,0.45)'}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              style={styles.newsletterInput}
+            />
+            {newsletterStatus ? (
+              <ThemedText
+                style={[
+                  styles.newsletterStatus,
+                  newsletterStatus.type === 'success'
+                    ? { color: palette.tint }
+                    : { color: colorScheme === 'dark' ? '#facc15' : '#b45309' },
+                ]}
+              >
+                {newsletterStatus.message}
+              </ThemedText>
+            ) : null}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleSubmitNewsletter}
+            style={[styles.newsletterButton, { backgroundColor: palette.tint }]}
+          >
+            <ThemedText type="defaultSemiBold" style={styles.newsletterButtonText} lightColor={palette.background} darkColor={palette.background}>
+              Subscribe
+            </ThemedText>
+          </Pressable>
+        </View>
+      </ThemedView>
+      <View style={styles.sectionIntro}>
+        <View style={styles.sectionIntroLabel}>
+          <IconSymbol name="sparkles" size={16} color={palette.tint} />
+          <ThemedText type="subtitle" style={styles.sectionIntroTitle}>
+            Quick launch
+          </ThemedText>
+        </View>
+        <ThemedText style={styles.sectionIntroCaption}>Priority destinations in one tap.</ThemedText>
+      </View>
+
+      <View style={styles.primaryQuickRow}>
+        {primaryActions.map((action) => (
           <Pressable
             key={action.title}
             onPress={() => router.push(action.route)}
             style={({ pressed }) => [
-              styles.quickCard,
-              {
-                borderColor: borderSubtle,
-                backgroundColor: highlightSurface,
-                shadowColor: palette.tint,
-              },
+              styles.primaryQuickCard,
+              { borderColor: borderSubtle },
               pressed && styles.quickCardPressed,
             ]}
           >
-            <LinearGradient
-              colors={palette.gradient ?? [palette.tint, palette.accent]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.quickBackdrop}
-              pointerEvents="none"
-            />
-            <View style={styles.quickHeaderRow}>
-              <LinearGradient
-                colors={palette.secondaryGradient ?? [palette.tint, palette.accent]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.quickIconWrap}
-              >
-                <IconSymbol name={action.icon as ComponentProps<typeof IconSymbol>['name']} size={20} color="#ffffff" />
-              </LinearGradient>
-              <ThemedView
-                lightColor="rgba(248, 250, 252, 0.9)"
-                darkColor="rgba(15, 23, 42, 0.92)"
-                style={styles.quickArrowBadge}
-              >
-                <IconSymbol name="arrow.up.right" size={16} color={palette.tint} />
-              </ThemedView>
+            <View style={styles.primaryQuickHeader}>
+              <View style={[styles.quickIconBadge, { borderColor: borderSubtle }]}>
+                <IconSymbol name={action.icon as ComponentProps<typeof IconSymbol>['name']} size={18} color={palette.tint} />
+              </View>
+              <IconSymbol name="arrow.up.right" size={16} color={palette.tint} />
             </View>
             <View style={styles.quickContent}>
               <ThemedText type="subtitle" style={styles.quickTitle}>
@@ -295,270 +404,299 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <SectionHeader title="Documentaries" caption="Immersive stories from the field" icon="film.fill" />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.documentaryCarousel}
-      >
-        {documentarySpotlight.map((feature, index) => (
+      <View style={styles.secondaryQuickList}>
+        {secondaryActions.map((action) => (
           <Pressable
-            key={feature.slug}
-            onPress={() => handleOpenDocumentary(feature.slug)}
-            style={[
-              styles.documentaryCard,
-              {
-                backgroundColor: featureSurface,
-                borderColor: borderSubtle,
-                marginLeft: index === 0 ? 4 : 0,
-              },
-            ]}
+            key={action.title}
+            onPress={() => router.push(action.route)}
+            style={({ pressed }) => [styles.secondaryQuickItem, pressed && styles.secondaryQuickItemPressed]}
           >
-            <Image source={{ uri: feature.image }} style={styles.documentaryMedia} contentFit="cover" />
-            <LinearGradient
-              colors={['rgba(15,23,42,0.1)', 'rgba(15,23,42,0.92)']}
-              style={styles.documentaryOverlay}
-            />
-            <View style={styles.documentaryInfo}>
-              <View style={styles.documentaryMetaRow}>
-                <View style={[styles.documentaryBadge, { backgroundColor: documentaryBadgeSurface }]}>
-                  <IconSymbol name="sparkles" size={14} color={documentaryBadgeText} />
-                  <ThemedText
-                    type="defaultSemiBold"
-                    style={styles.documentaryBadgeLabel}
-                    lightColor={documentaryBadgeText}
-                    darkColor={documentaryBadgeText}
-                  >
-                    Spotlight
-                  </ThemedText>
-                </View>
-                <ThemedText
-                  style={styles.documentaryDuration}
-                  lightColor={documentaryDurationText}
-                  darkColor={documentaryDurationText}
-                >
-                  {feature.duration}
-                </ThemedText>
-              </View>
+            <View style={[styles.secondaryIconBadge, { borderColor: borderSubtle }]}>
+              <IconSymbol name={action.icon as ComponentProps<typeof IconSymbol>['name']} size={16} color={palette.tint} />
+            </View>
+            <View style={styles.secondaryQuickCopy}>
+              <ThemedText style={styles.secondaryQuickTitle}>{action.title}</ThemedText>
+              <ThemedText style={styles.secondaryQuickSubtitle}>{action.subtitle}</ThemedText>
+            </View>
+            <IconSymbol name="chevron.right" size={16} color={palette.tint} />
+          </Pressable>
+        ))}
+      </View>
 
-              <ThemedText
-                type="subtitle"
-                style={styles.documentaryTitle}
-                lightColor="#f8fafc"
-                darkColor="#f8fafc"
-              >
-                {feature.title}
-              </ThemedText>
-              <ThemedText
-                style={styles.documentarySummary}
-                lightColor={documentarySummaryText}
-                darkColor={documentarySummaryText}
-              >
-                {feature.summary}
-              </ThemedText>
-
-              <View style={styles.documentaryTags}>
-                {feature.tags.slice(0, 2).map((tag) => (
-                  <View
-                    key={`${feature.slug}-${tag}`}
-                    style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}
-                  >
+      <SectionBand
+        title="Watch & Listen"
+        description="Documentaries and mission audio from correspondents embedded around the globe."
+        icon="film.fill"
+        ctaLabel="View all films"
+        onPressCta={() => router.push('/documentaries')}
+        variant="solid"
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.documentaryCarousel}
+        >
+          {documentarySpotlight.map((feature, index) => (
+            <Pressable
+              key={feature.slug}
+              onPress={() => handleOpenDocumentary(feature.slug)}
+              style={[
+                styles.documentaryCard,
+                {
+                  backgroundColor: featureSurface,
+                  borderColor: borderSubtle,
+                  marginLeft: index === 0 ? 4 : 0,
+                },
+              ]}
+            >
+              <Image source={{ uri: feature.image }} style={styles.documentaryMedia} contentFit="cover" />
+              <LinearGradient
+                colors={['rgba(15,23,42,0.1)', 'rgba(15,23,42,0.92)']}
+                style={styles.documentaryOverlay}
+              />
+              <View style={styles.documentaryInfo}>
+                <View style={styles.documentaryMetaRow}>
+                  <View style={[styles.documentaryBadge, { backgroundColor: documentaryBadgeSurface }]}>
+                    <IconSymbol name="sparkles" size={14} color={documentaryBadgeText} />
                     <ThemedText
-                      style={styles.documentaryTagLabel}
-                      lightColor={documentaryTagText}
-                      darkColor={documentaryTagText}
+                      type="defaultSemiBold"
+                      style={styles.documentaryBadgeLabel}
+                      lightColor={documentaryBadgeText}
+                      darkColor={documentaryBadgeText}
                     >
-                      {tag}
+                      Spotlight
                     </ThemedText>
                   </View>
-                ))}
-              </View>
+                  <ThemedText
+                    style={styles.documentaryDuration}
+                    lightColor={documentaryDurationText}
+                    darkColor={documentaryDurationText}
+                  >
+                    {feature.duration}
+                  </ThemedText>
+                </View>
 
-              <View style={styles.documentaryAction}>
-                <IconSymbol name="play.fill" size={16} color={palette.tint} />
                 <ThemedText
-                  type="defaultSemiBold"
-                  style={styles.documentaryActionLabel}
-                  lightColor={palette.tint}
-                  darkColor={palette.tint}
+                  type="subtitle"
+                  style={styles.documentaryTitle}
+                  lightColor="#f8fafc"
+                  darkColor="#f8fafc"
                 >
-                  Watch trailer
+                  {feature.title}
                 </ThemedText>
-              </View>
-            </View>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      <SectionHeader title="Protest Watch" caption="Current movements shaping policy" icon="megaphone.fill" />
-      <ThemedView
-        style={[styles.panelCard, { borderColor: borderSubtle }]}
-        lightColor={panelSurface}
-        darkColor={panelSurface}
-      >
-        {protestWatchHighlights.map((protest) => (
-          <Pressable
-            key={protest.slug}
-            onPress={() => router.push('/protests')}
-            style={styles.protestRow}
-          >
-            <View style={styles.protestHeader}>
-              <ThemedText type="subtitle" style={styles.protestRegion}>
-                {protest.region}
-              </ThemedText>
-              <View style={[styles.statusChip, { backgroundColor: tintedSurface }]}> 
-                <IconSymbol name="dot.radiowaves.up.forward" size={14} color={palette.tint} />
-                <ThemedText style={[styles.statusLabel, { color: palette.tint }]}>{protest.status}</ThemedText>
-              </View>
-            </View>
-            <ThemedText style={styles.protestMovement}>{protest.movement}</ThemedText>
-            <ThemedText style={styles.protestUpdate}>{protest.update}</ThemedText>
-            <ProgressBar value={protest.severity * 100} tint={palette.tint} />
-          </Pressable>
-        ))}
-      </ThemedView>
-
-      <SectionHeader title="Government Good Index" caption="Governance, transparency & trust" icon="chart.bar.xaxis" />
-      <ThemedView
-        style={[styles.indexContainer, { borderColor: borderSubtle }]}
-        lightColor={panelSurface}
-        darkColor={panelSurface}
-      >
-        {governanceSpotlight.map((entry) => (
-          <Pressable
-            key={entry.country}
-            onPress={() => router.push('/governance-index')}
-            style={styles.indexRow}
-          >
-            <View style={styles.indexHeader}>
-              <ThemedText type="subtitle" style={styles.indexCountry}>
-                {entry.country}
-              </ThemedText>
-              <View style={styles.indexScoreGroup}>
-                <IconSymbol name="shield.lefthalf.filled" size={16} color={palette.tint} />
-                <ThemedText type="defaultSemiBold" style={styles.indexScore}>
-                  {entry.score}
+                <ThemedText
+                  style={styles.documentarySummary}
+                  lightColor={documentarySummaryText}
+                  darkColor={documentarySummaryText}
+                >
+                  {feature.summary}
                 </ThemedText>
+
+                <View style={styles.documentaryTags}>
+                  {feature.tags.slice(0, 2).map((tag) => (
+                    <View
+                      key={`${feature.slug}-${tag}`}
+                      style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}
+                    >
+                      <ThemedText
+                        style={styles.documentaryTagLabel}
+                        lightColor={documentaryTagText}
+                        darkColor={documentaryTagText}
+                      >
+                        {tag}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.documentaryAction}>
+                  <IconSymbol name="play.fill" size={16} color={palette.tint} />
+                  <ThemedText
+                    type="defaultSemiBold"
+                    style={styles.documentaryActionLabel}
+                    lightColor={palette.tint}
+                    darkColor={palette.tint}
+                  >
+                    Watch trailer
+                  </ThemedText>
+                </View>
+              </View>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </SectionBand>
+
+      <SectionBand
+        title="Governance Intelligence"
+        description="Scorecards, transparency signals, and institutional trust indicators refreshed weekly."
+        icon="chart.bar.xaxis"
+        ctaLabel="View full index"
+        onPressCta={() => router.push('/governance-index')}
+        variant="tinted"
+      >
+        <ThemedView
+          style={[styles.indexContainer, { borderColor: borderSubtle }]}
+          lightColor={bandSurface}
+          darkColor={bandSurface}
+        >
+          {governanceSpotlight.map((entry) => (
+            <Pressable
+              key={entry.country}
+              onPress={() => router.push('/governance-index')}
+              style={styles.indexRow}
+            >
+              <View style={styles.indexHeader}>
+                <ThemedText type="subtitle" style={styles.indexCountry}>
+                  {entry.country}
+                </ThemedText>
+                <View style={styles.indexScoreGroup}>
+                  <IconSymbol name="shield.lefthalf.filled" size={16} color={palette.tint} />
+                  <ThemedText type="defaultSemiBold" style={styles.indexScore}>
+                    {entry.score}
+                  </ThemedText>
+                </View>
+              </View>
+              <ProgressBar value={entry.score} tint={palette.tint} />
+              <ThemedText style={styles.indexDelta}>
+                {entry.change > 0
+                  ? `▲ ${entry.change} this week`
+                  : entry.change < 0
+                    ? `▼ ${Math.abs(entry.change)} this week`
+                    : 'Unchanged'}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ThemedView>
+      </SectionBand>
+
+      <SectionBand
+        title="On-the-ground"
+        description="Movements, field intel, and solution prototypes emerging from civic frontlines."
+        icon="megaphone.fill"
+        ctaLabel="View protest desk"
+        onPressCta={() => router.push('/protests')}
+        variant="solid"
+      >
+        <ThemedView
+          style={[styles.panelCard, { borderColor: borderSubtle }]}
+          lightColor={panelSurface}
+          darkColor={panelSurface}
+        >
+          {protestWatchHighlights.map((protest) => (
+            <Pressable
+              key={protest.slug}
+              onPress={() => router.push('/protests')}
+              style={styles.protestRow}
+            >
+              <View style={styles.protestHeader}>
+                <ThemedText type="subtitle" style={styles.protestRegion}>
+                  {protest.region}
+                </ThemedText>
+                <View style={[styles.statusChip, { backgroundColor: tintedSurface }]}>
+                  <IconSymbol name="dot.radiowaves.up.forward" size={14} color={palette.tint} />
+                  <ThemedText style={[styles.statusLabel, { color: palette.tint }]}>{protest.status}</ThemedText>
+                </View>
+              </View>
+              <ThemedText style={styles.protestMovement}>{protest.movement}</ThemedText>
+              <ThemedText style={styles.protestUpdate}>{protest.update}</ThemedText>
+              <ProgressBar value={protest.severity * 100} tint={palette.tint} />
+            </Pressable>
+          ))}
+        </ThemedView>
+
+        <ThemedView
+          style={[styles.forwardContainer, { borderColor: borderSubtle }]}
+          lightColor={bandAltSurface}
+          darkColor={bandAltSurface}
+        >
+          {forwardFocus.map((item) => (
+            <View key={item.title} style={styles.forwardCard}>
+              <IconSymbol name="sparkle" size={20} color={palette.tint} />
+              <View style={styles.forwardContent}>
+                <ThemedText type="subtitle" style={styles.forwardTitle}>
+                  {item.title}
+                </ThemedText>
+                <ThemedText style={styles.forwardSummary}>{item.summary}</ThemedText>
               </View>
             </View>
-            <ProgressBar value={entry.score} tint={palette.tint} />
-            <ThemedText style={styles.indexDelta}>
-              {entry.change > 0 ? `▲ ${entry.change} this week` : entry.change < 0 ? `▼ ${Math.abs(entry.change)} this week` : 'Unchanged'}
-            </ThemedText>
-          </Pressable>
-        ))}
-      </ThemedView>
-
-      <SectionHeader title="Forward Focus" caption="Solutions worth celebrating" icon="leaf.fill" />
-      <ThemedView
-        style={[styles.forwardContainer, { borderColor: borderSubtle }]}
-        lightColor={forwardSurface}
-        darkColor={forwardSurface}
-      >
-        {forwardFocus.map((item) => (
-          <View key={item.title} style={styles.forwardCard}>
-            <IconSymbol name="sparkle" size={20} color={palette.tint} />
-            <View style={styles.forwardContent}>
-              <ThemedText type="subtitle" style={styles.forwardTitle}>
-                {item.title}
-              </ThemedText>
-              <ThemedText style={styles.forwardSummary}>{item.summary}</ThemedText>
-            </View>
-          </View>
-        ))}
-      </ThemedView>
-
-      <LinearGradient
-        colors={
-          colorScheme === 'dark'
-            ? ['#0f172a', '#0b2942']
-            : ['#0ea5e9', '#0369a1']
-        }
-        style={styles.newsletterCard}
-      >
-        <View style={styles.newsletterHeader}>
-          <View style={styles.newsletterIconWrap}>
-            <IconSymbol name="envelope.open.fill" size={22} color="#0f172a" />
-          </View>
-          <View style={styles.newsletterTextBlock}>
-            <ThemedText type="subtitle" style={styles.newsletterTitle} lightColor="#ffffff" darkColor="#ffffff">
-              Get the weekend insider brief
-            </ThemedText>
-            <ThemedText style={styles.newsletterSubtitle} lightColor="rgba(255,255,255,0.85)" darkColor="rgba(255,255,255,0.85)">
-              Receive curated investigations, accountability spotlights, and dispatch intel in your inbox.
-            </ThemedText>
-          </View>
-        </View>
-        <View style={styles.newsletterForm}>
-          <TextInput
-            value={newsletterEmail}
-            onChangeText={(value) => {
-              setNewsletterEmail(value);
-              if (newsletterStatus) {
-                setNewsletterStatus(null);
-              }
-            }}
-            placeholder="you@example.com"
-            placeholderTextColor="rgba(255,255,255,0.6)"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            style={styles.newsletterInput}
-          />
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleSubmitNewsletter}
-            style={styles.newsletterButton}
-          >
-            <ThemedText type="defaultSemiBold" style={styles.newsletterButtonText} lightColor="#0f172a" darkColor="#0f172a">
-              Submit
-            </ThemedText>
-          </Pressable>
-        </View>
-        {newsletterStatus ? (
-          <ThemedText
-            style={styles.newsletterStatus}
-            lightColor={newsletterStatus.type === 'success' ? '#e2f7ff' : '#facc15'}
-            darkColor={newsletterStatus.type === 'success' ? '#e2f7ff' : '#fde68a'}
-          >
-            {newsletterStatus.message}
-          </ThemedText>
-        ) : null}
-      </LinearGradient>
+          ))}
+        </ThemedView>
+      </SectionBand>
     </ParallaxScrollView>
   );
 }
 
-function SectionHeader({
+function SectionBand({
   title,
-  caption,
+  description,
   icon,
+  ctaLabel,
+  onPressCta,
+  variant = 'solid',
+  children,
 }: {
   title: string;
-  caption: string;
+  description: string;
   icon: ComponentProps<typeof IconSymbol>['name'];
+  ctaLabel?: string;
+  onPressCta?: () => void;
+  variant?: 'solid' | 'tinted';
+  children: ReactNode;
 }) {
   const colorScheme = useColorScheme();
   const palette = Colors[colorScheme ?? 'light'];
+  const solidBackground = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
+  const tintedBackground = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f6f7fb';
+  const background = variant === 'solid' ? solidBackground : tintedBackground;
+  const badgeBackground =
+    variant === 'solid'
+      ? colorScheme === 'dark'
+        ? 'rgba(99, 102, 241, 0.28)'
+        : 'rgba(99, 102, 241, 0.16)'
+      : colorScheme === 'dark'
+        ? 'rgba(148, 163, 184, 0.22)'
+        : 'rgba(148, 163, 184, 0.24)';
+  const borderColor =
+    variant === 'solid'
+      ? palette.stroke ?? (colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.25)' : '#e2e8f0')
+      : 'transparent';
 
   return (
-    <View style={styles.sectionHeader}>
-      <View style={styles.sectionTitleRow}>
-        <LinearGradient
-          colors={palette.secondaryGradient ?? [palette.tint, palette.accent]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.sectionIconBadge}
-        >
-          <IconSymbol name={icon} size={18} color="#ffffff" />
-        </LinearGradient>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          {title}
-        </ThemedText>
+    <ThemedView
+      style={[
+        styles.sectionBand,
+        { borderColor },
+        variant === 'tinted' ? styles.sectionBandTinted : null,
+      ]}
+      lightColor={background}
+      darkColor={background}
+    >
+      <View style={styles.sectionBandHeader}>
+        <View style={styles.sectionBandTitleGroup}>
+          <View style={[styles.sectionBandIcon, { backgroundColor: badgeBackground }]}>
+            <IconSymbol name={icon} size={18} color={palette.tint} />
+          </View>
+          <View style={styles.sectionBandText}>
+            <ThemedText type="subtitle" style={styles.sectionBandTitle}>
+              {title}
+            </ThemedText>
+            <ThemedText style={styles.sectionBandDescription}>{description}</ThemedText>
+          </View>
+        </View>
+        {ctaLabel && onPressCta ? (
+          <Pressable onPress={onPressCta} style={styles.sectionBandCta}>
+            <ThemedText
+              type="defaultSemiBold"
+              style={[styles.sectionBandCtaLabel, { color: palette.tint }]}
+            >
+              {ctaLabel}
+            </ThemedText>
+            <IconSymbol name="arrow.up.right" size={16} color={palette.tint} />
+          </Pressable>
+        ) : null}
       </View>
-      <View style={[styles.sectionAccent, { backgroundColor: palette.tint }]} />
-      <ThemedText style={styles.sectionCaption}>{caption}</ThemedText>
-    </View>
+      <View style={styles.sectionBandContent}>{children}</View>
+    </ThemedView>
   );
 }
 
@@ -571,62 +709,96 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 3,
     marginTop: -32,
-    marginBottom: 20,
+    marginBottom: 24,
+    gap: 12,
   },
-  hero: {
-    padding: 28,
-    gap: 20,
-    borderRadius: 25,
-    borderWidth: 1,
-  },
-  heroBanner: {
+  heroTopBanner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 18,
+    borderRadius: 22,
+    borderWidth: 1,
   },
   heroBrandBlock: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 14,
+  },
+  heroBrandText: {
+    gap: 4,
   },
   heroTagline: {
     fontSize: 14,
-    letterSpacing: 1.6,
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
   },
-  heroCtaCluster: {
-    alignItems: 'flex-end',
-    gap: 10,
-  },
-  heroCtaLabel: {
+  heroEyebrow: {
     fontSize: 12,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    fontWeight: '600',
+    opacity: 0.75,
   },
   heroButton: {
     borderRadius: 999,
-    paddingHorizontal: 20,
+    borderWidth: 1,
+    paddingHorizontal: 18,
     paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  heroButtonDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(99, 102, 241, 0.45)',
   },
   heroButtonLabel: {
     fontSize: 15,
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
-  heroBody: {
-    gap: 16,
+  heroMain: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 24,
+    gap: 20,
   },
   heroHeadlineGroup: {
     gap: 12,
   },
   heroTitle: {
-    fontSize: 34,
-    lineHeight: 40,
+    fontSize: 32,
+    lineHeight: 38,
   },
   heroSubtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    opacity: 0.9,
+    fontSize: 15,
+    lineHeight: 22,
+    opacity: 0.85,
+  },
+  heroTabs: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  heroTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  heroTabDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+  },
+  heroTabLabel: {
+    fontSize: 12,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   heroSpotlight: {
     borderWidth: 1,
@@ -649,29 +821,17 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     opacity: 0.85,
   },
-  metricPanel: {
+  metricBand: {
     flexDirection: 'row',
-    gap: 12,
-    flexWrap: 'wrap',
-  },
-  metricCard: {
     borderWidth: 1,
     borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    flexGrow: 1,
-    minWidth: 100,
-    gap: 4,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
   },
-  metricPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  metricAccent: {
-    width: 8,
-    height: 32,
-    borderRadius: 999,
+  metricItem: {
+    flex: 1,
+    paddingHorizontal: 12,
+    gap: 6,
   },
   metricValue: {
     fontSize: 24,
@@ -679,89 +839,113 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 12,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
     opacity: 0.7,
   },
-  sectionHeader: {
-    marginTop: 24,
-    marginBottom: 12,
-    gap: 6,
+  newsletterStrip: {
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 18,
+    gap: 16,
+    marginBottom: 24,
   },
-  sectionTitleRow: {
+  newsletterIntro: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
+    alignItems: 'flex-start',
   },
-  sectionIconBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+  newsletterBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(99, 102, 241, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  sectionTitle: {
-    fontSize: 20,
+  newsletterCopy: {
+    flex: 1,
+    gap: 4,
   },
-  sectionAccent: {
-    width: 36,
-    height: 3,
-    borderRadius: 999,
+  newsletterTitle: {
+    fontSize: 18,
   },
-  sectionCaption: {
-    opacity: 0.7,
+  newsletterSubtitle: {
     fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.75,
   },
-  quickGrid: {
+  newsletterControls: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 12,
+    alignItems: 'flex-end',
   },
-  quickCard: {
+  newsletterFieldset: {
+    flex: 1,
+    gap: 6,
+  },
+  newsletterInput: {
+    borderRadius: 14,
     borderWidth: 1,
-    borderRadius: 20,
-    padding: 18,
-    width: '48%',
-    minWidth: 160,
-    overflow: 'hidden',
-    position: 'relative',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  newsletterStatus: {
+    fontSize: 13,
+  },
+  newsletterButton: {
+    borderRadius: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  newsletterButtonText: {
+    fontSize: 15,
+  },
+  sectionIntro: {
+    marginTop: 8,
     marginBottom: 16,
+    gap: 6,
   },
-  quickCardPressed: {
-    transform: [{ translateY: 2 }],
-    opacity: 0.92,
-  },
-  quickBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.14,
-    borderRadius: 20,
-  },
-  quickHeaderRow: {
+  sectionIntroLabel: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    gap: 8,
   },
-  quickIconWrap: {
+  sectionIntroTitle: {
+    fontSize: 20,
+  },
+  sectionIntroCaption: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  primaryQuickRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 12,
+  },
+  primaryQuickCard: {
+    flex: 1,
+    minWidth: 160,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 18,
+    gap: 14,
+  },
+  primaryQuickHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  quickIconBadge: {
     width: 44,
     height: 44,
     borderRadius: 16,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  quickArrowBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowColor: '#000000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(99, 102, 241, 0.12)',
   },
   quickContent: {
     gap: 6,
@@ -773,6 +957,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     opacity: 0.75,
+  },
+  quickCardPressed: {
+    transform: [{ translateY: 2 }],
+    opacity: 0.92,
+  },
+  secondaryQuickList: {
+    gap: 10,
+    marginBottom: 24,
+  },
+  secondaryQuickItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  secondaryQuickItemPressed: {
+    opacity: 0.85,
+  },
+  secondaryIconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryQuickCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  secondaryQuickTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  secondaryQuickSubtitle: {
+    fontSize: 13,
+    opacity: 0.7,
   },
   documentaryCarousel: {
     paddingBottom: 4,
@@ -960,65 +1184,62 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
-  newsletterCard: {
-    marginTop: 32,
-    borderRadius: 26,
-    padding: 24,
-    gap: 18,
-    overflow: 'hidden',
-  },
-  newsletterHeader: {
-    flexDirection: 'row',
+  sectionBand: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    marginBottom: 28,
     gap: 16,
-    alignItems: 'center',
   },
-  newsletterIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: '#ffffff',
+  sectionBandTinted: {
+    borderWidth: 0,
+  },
+  sectionBandHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+  },
+  sectionBandTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    flex: 1,
+  },
+  sectionBandIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  newsletterTextBlock: {
+  sectionBandText: {
     flex: 1,
-    gap: 6,
+    gap: 4,
   },
-  newsletterTitle: {
-    color: '#ffffff',
-    fontSize: 22,
+  sectionBandTitle: {
+    fontSize: 20,
   },
-  newsletterSubtitle: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 15,
-    lineHeight: 22,
+  sectionBandDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.75,
   },
-  newsletterForm: {
+  sectionBandCta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
   },
-  newsletterInput: {
-    flex: 1,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: '#ffffff',
-    fontSize: 16,
+  sectionBandCtaLabel: {
+    fontSize: 13,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
-  newsletterButton: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 22,
-    paddingVertical: 14,
-    borderRadius: 16,
-  },
-  newsletterButtonText: {
-    color: '#0f172a',
-    fontSize: 16,
-  },
-  newsletterStatus: {
-    fontSize: 14,
-    opacity: 0.9,
+  sectionBandContent: {
+    gap: 16,
   },
 });
+
