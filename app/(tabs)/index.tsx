@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { useCallback, useState } from 'react';
 import { Image } from 'expo-image';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -10,11 +10,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TimelineLogo } from '@/components/timeline-logo';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import {
-  documentarySpotlight,
-  governanceSpotlight,
-  protestWatchHighlights,
-} from '@/constants/content';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -41,43 +36,6 @@ const heroMetrics = [
   { label: 'Policy briefings / week', value: '42' },
   { label: 'Investigations active', value: '23' },
 ];
-
-const governanceSignalLabels = ['Transparency', 'Civic trust', 'Crisis readiness'];
-
-const governanceScoreTier = (score: number) => {
-  if (score >= 85) {
-    return { label: 'Benchmark leader', tone: 'Stability at scale' };
-  }
-  if (score >= 75) {
-    return { label: 'Strong performer', tone: 'Consistent reforms' };
-  }
-  if (score >= 65) {
-    return { label: 'Steady climb', tone: 'Institutional upgrades' };
-  }
-  return { label: 'In focus', tone: 'Reform momentum building' };
-};
-
-const describeGovernanceSignal = (score: number, label: string) => {
-  switch (label) {
-    case 'Transparency':
-      return `${70 + Math.round(score / 4)}% open data`;
-    case 'Civic trust':
-      return `${55 + Math.round(score / 5)}% positive sentiment`;
-    case 'Crisis readiness':
-    default:
-      return `${60 + Math.round(score / 6)}% response capacity`;
-  }
-};
-
-const deriveProtestMonitors = (severity: number, index: number) => ({
-  monitors: 12 + Math.round(severity * 18) + index * 2,
-  updates: 3 + index * 2,
-});
-
-const deriveDocumentaryMomentum = (index: number) => ({
-  watchlists: 120 + index * 36,
-  regions: 4 + index,
-});
 
 const quickActions = [
   {
@@ -131,45 +89,14 @@ const quickActions = [
   },
 ];
 
-const forwardFocus = [
-  {
-    title: 'Carbon-negative cement reaches commercial scale',
-    summary:
-      'Two megacities approve rapid deployment of carbon-sequestering construction, lowering build emissions by 68%.',
-  },
-  {
-    title: 'Indigenous innovation labs create circular economies',
-    summary:
-      'Community-led labs across the Pacific accelerate zero-waste supply chains with open-source tooling.',
-  },
-];
-
-function ProgressBar({ value, tint }: { value: number; tint: string }) {
-  const colorScheme = useColorScheme();
-  const trackColor = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.35)' : '#e2e8f0';
-
-  return (
-    <View style={[styles.progressTrack, { backgroundColor: trackColor }]}>
-      <View style={[styles.progressFill, { width: `${Math.min(100, Math.max(0, value))}%`, backgroundColor: tint }]} />
-    </View>
-  );
-}
-
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const palette = Colors[colorScheme ?? 'light'];
   const borderSubtle = colorScheme === 'dark' ? palette.stroke ?? 'rgba(148, 163, 184, 0.25)' : palette.stroke ?? '#e2e8f0';
   const highlightSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.72)' : palette.card ?? '#ffffff';
-  const featureSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.85)' : '#0f172a';
   const tintedSurface = colorScheme === 'dark' ? 'rgba(99, 102, 241, 0.28)' : 'rgba(99, 102, 241, 0.12)';
   const heroBadgeForeground = colorScheme === 'dark' ? '#f8fafc' : palette.background;
   const heroBadgeBackground = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.88)' : '#ffffff';
-  const documentaryBadgeSurface = colorScheme === 'dark' ? 'rgba(59, 130, 246, 0.35)' : 'rgba(15, 23, 42, 0.45)';
-  const documentaryBadgeText = '#f8fafc';
-  const documentaryTagSurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.18)' : 'rgba(226, 232, 240, 0.76)';
-  const documentaryTagText = colorScheme === 'dark' ? '#f8fafc' : '#0f172a';
-  const documentaryDurationText = colorScheme === 'dark' ? 'rgba(226, 232, 240, 0.92)' : 'rgba(241, 245, 249, 0.95)';
-  const documentarySummaryText = colorScheme === 'dark' ? 'rgba(226, 232, 240, 0.86)' : 'rgba(248, 250, 252, 0.92)';
   const router = useRouter();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -177,21 +104,7 @@ export default function HomeScreen() {
   const activeHeadline = heroHeadlines[activeHeadlineIndex];
   const primaryActions = quickActions.filter((action) => action.priority === 'primary');
   const secondaryActions = quickActions.filter((action) => action.priority === 'secondary');
-  const bandAltSurface = colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.72)' : '#f5f7ff';
   const tertiarySurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f1f5f9';
-  const documentaryFeatureGlow = colorScheme === 'dark' ? 'rgba(15,23,42,0.8)' : 'rgba(15, 23, 42, 0.88)';
-  const governanceCardSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
-  const protestCardSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
-  const protestAccent = colorScheme === 'dark' ? palette.tint : '#4338ca';
-  const [featuredDocumentary, ...supportingDocumentaries] = documentarySpotlight;
-  const featuredMomentum = featuredDocumentary ? deriveDocumentaryMomentum(0) : null;
-
-  const handleOpenDocumentary = useCallback(
-    (slug: string) => {
-      router.push({ pathname: '/documentaries', params: { slug } });
-    },
-    [router],
-  );
 
   const handleSubmitNewsletter = useCallback(() => {
     const trimmed = newsletterEmail.trim();
@@ -464,345 +377,10 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <SectionBand
-        title="Watch & Listen"
-        description="Documentaries and mission audio from correspondents embedded around the globe."
-        icon="film.fill"
-        ctaLabel="View all films"
-        onPressCta={() => router.push('/documentaries')}
-        variant="solid"
-      >
-        {featuredDocumentary ? (
-          <Pressable
-            onPress={() => handleOpenDocumentary(featuredDocumentary.slug)}
-            style={[
-              styles.documentaryFeature,
-              { borderColor: borderSubtle, backgroundColor: featureSurface },
-            ]}
-          >
-            <Image source={{ uri: featuredDocumentary.image }} style={styles.documentaryFeatureImage} contentFit="cover" />
-            <LinearGradient
-              colors={['rgba(15,23,42,0.15)', documentaryFeatureGlow]}
-              style={styles.documentaryFeatureOverlay}
-            />
-            <View style={styles.documentaryFeatureContent}>
-              <View style={styles.documentaryMetaRow}>
-                <View style={[styles.documentaryBadge, { backgroundColor: documentaryBadgeSurface }]}>
-                  <IconSymbol name="sparkles" size={14} color={documentaryBadgeText} />
-                  <ThemedText
-                    type="defaultSemiBold"
-                    style={styles.documentaryBadgeLabel}
-                    lightColor={documentaryBadgeText}
-                    darkColor={documentaryBadgeText}
-                  >
-                    Field feature
-                  </ThemedText>
-                </View>
-                <ThemedText
-                  style={styles.documentaryDuration}
-                  lightColor={documentaryDurationText}
-                  darkColor={documentaryDurationText}
-                >
-                  {featuredDocumentary.duration}
-                </ThemedText>
-              </View>
-              <ThemedText type="subtitle" style={styles.documentaryFeatureTitle} lightColor="#f8fafc" darkColor="#f8fafc">
-                {featuredDocumentary.title}
-              </ThemedText>
-              <ThemedText style={styles.documentaryFeatureSummary} lightColor={documentarySummaryText} darkColor={documentarySummaryText}>
-                {featuredDocumentary.summary}
-              </ThemedText>
-              <View style={styles.documentaryMomentumRow}>
-                <View style={styles.documentaryMomentumItem}>
-                  <IconSymbol name="star.fill" size={16} color={palette.tint} />
-                  <View>
-                    <ThemedText type="defaultSemiBold" style={styles.documentaryMomentumValue} lightColor={palette.tint} darkColor={palette.tint}>
-                      {featuredMomentum?.watchlists}+ watchlists
-                    </ThemedText>
-                    <ThemedText style={styles.documentaryMomentumLabel}>
-                      Across {featuredMomentum?.regions} regions
-                    </ThemedText>
-                  </View>
-                </View>
-                <View style={styles.documentaryMomentumItem}>
-                  <IconSymbol name="film.fill" size={16} color={palette.tint} />
-                  <View>
-                    <ThemedText type="defaultSemiBold" style={styles.documentaryMomentumValue} lightColor={palette.tint} darkColor={palette.tint}>
-                      {featuredDocumentary.tags[0]}
-                    </ThemedText>
-                    <ThemedText style={styles.documentaryMomentumLabel}>Primary focus</ThemedText>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.documentaryAction}>
-                <IconSymbol name="play.fill" size={16} color={palette.tint} />
-                <ThemedText type="defaultSemiBold" style={styles.documentaryActionLabel} lightColor={palette.tint} darkColor={palette.tint}>
-                  Watch trailer
-                </ThemedText>
-              </View>
-            </View>
-          </Pressable>
-        ) : null}
-        {supportingDocumentaries.length > 0 ? (
-          <View style={styles.documentarySupportGrid}>
-            {supportingDocumentaries.map((feature, index) => {
-              const momentum = deriveDocumentaryMomentum(index + 1);
-              return (
-                <Pressable
-                  key={feature.slug}
-                  onPress={() => handleOpenDocumentary(feature.slug)}
-                  style={[styles.documentarySupportCard, { borderColor: borderSubtle, backgroundColor: palette.background }]}
-                >
-                  <Image source={{ uri: feature.image }} style={styles.documentarySupportImage} contentFit="cover" />
-                  <View style={styles.documentarySupportContent}>
-                    <View style={styles.documentarySupportHeader}>
-                      <ThemedText type="subtitle" style={styles.documentarySupportTitle}>
-                        {feature.title}
-                      </ThemedText>
-                      <ThemedText style={styles.documentarySupportDuration}>{feature.duration}</ThemedText>
-                    </View>
-                    <ThemedText style={styles.documentarySupportSummary}>{feature.summary}</ThemedText>
-                    <View style={styles.documentarySupportStats}>
-                      <View style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}> 
-                        <ThemedText style={styles.documentaryTagLabel} lightColor={documentaryTagText} darkColor={documentaryTagText}>
-                          {momentum.watchlists}+ saved
-                        </ThemedText>
-                      </View>
-                      <View style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}> 
-                        <ThemedText style={styles.documentaryTagLabel} lightColor={documentaryTagText} darkColor={documentaryTagText}>
-                          {feature.tags[0]}
-                        </ThemedText>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : null}
-      </SectionBand>
-
-      <SectionBand
-        title="Governance Intelligence"
-        description="Scorecards, transparency signals, and institutional trust indicators refreshed weekly."
-        icon="chart.bar.xaxis"
-        ctaLabel="View full index"
-        onPressCta={() => router.push('/governance-index')}
-        variant="tinted"
-      >
-        <View style={styles.indexGrid}>
-          {governanceSpotlight.map((entry) => {
-            const tier = governanceScoreTier(entry.score);
-            return (
-              <Pressable
-                key={entry.country}
-                onPress={() => router.push('/governance-index')}
-                style={[styles.indexCard, { borderColor: borderSubtle, backgroundColor: governanceCardSurface }]}
-              >
-                <View style={styles.indexCardHeader}>
-                  <View>
-                    <ThemedText type="subtitle" style={styles.indexCountry}>
-                      {entry.country}
-                    </ThemedText>
-                    <ThemedText style={styles.indexTone}>{tier.tone}</ThemedText>
-                  </View>
-                  <View style={[styles.indexTierBadge, { backgroundColor: tintedSurface }]}> 
-                    <IconSymbol name="shield.lefthalf.filled" size={14} color={palette.tint} />
-                    <ThemedText style={[styles.indexTierLabel, { color: palette.tint }]}>{tier.label}</ThemedText>
-                  </View>
-                </View>
-                <View style={styles.indexScoreWrap}>
-                  <ThemedText type="title" style={styles.indexScoreLarge}>
-                    {entry.score}
-                  </ThemedText>
-                  <View style={styles.indexChangePill}>
-                    <IconSymbol
-                      name={entry.change >= 0 ? 'arrow.up' : 'arrow.down'}
-                      size={14}
-                      color={entry.change >= 0 ? palette.tint : '#f97316'}
-                    />
-                    <ThemedText
-                      style={[
-                        styles.indexChangeLabel,
-                        { color: entry.change >= 0 ? palette.tint : '#f97316' },
-                      ]}
-                    >
-                      {entry.change >= 0 ? `+${entry.change}` : entry.change} pts
-                    </ThemedText>
-                  </View>
-                </View>
-                <ProgressBar value={entry.score} tint={palette.tint} />
-                <View style={styles.indexSignalRow}>
-                  {governanceSignalLabels.map((label) => (
-                    <View key={`${entry.country}-${label}`} style={styles.indexSignal}>
-                      <ThemedText style={styles.indexSignalLabel}>{label}</ThemedText>
-                      <ThemedText type="defaultSemiBold" style={styles.indexSignalValue}>
-                        {describeGovernanceSignal(entry.score, label)}
-                      </ThemedText>
-                    </View>
-                  ))}
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-      </SectionBand>
-
-      <SectionBand
-        title="On-the-ground"
-        description="Movements, field intel, and solution prototypes emerging from civic frontlines."
-        icon="megaphone.fill"
-        ctaLabel="View protest desk"
-        onPressCta={() => router.push('/protests')}
-        variant="solid"
-      >
-        <View style={styles.protestGrid}>
-          {protestWatchHighlights.map((protest, index) => {
-            const severityPercent = Math.round(protest.severity * 100);
-            const stats = deriveProtestMonitors(protest.severity, index);
-            return (
-              <Pressable
-                key={protest.slug}
-                onPress={() => router.push('/protests')}
-                style={({ pressed }) => [
-                  styles.protestCard,
-                  {
-                    borderColor: borderSubtle,
-                    backgroundColor: protestCardSurface,
-                  },
-                  pressed && styles.protestCardPressed,
-                ]}
-              >
-                <View style={styles.protestCardHeader}>
-                  <View>
-                    <ThemedText type="subtitle" style={styles.protestRegion}>
-                      {protest.region}
-                    </ThemedText>
-                    <ThemedText style={styles.protestStatus}>{protest.status}</ThemedText>
-                  </View>
-                  <View style={[styles.protestSeverityBadge, { borderColor: protestAccent }]}> 
-                    <ThemedText type="defaultSemiBold" style={[styles.protestSeverityValue, { color: protestAccent }]}>
-                      {severityPercent}%
-                    </ThemedText>
-                    <ThemedText style={[styles.protestSeverityLabel, { color: protestAccent }]}>Intensity</ThemedText>
-                  </View>
-                </View>
-                <ThemedText type="subtitle" style={styles.protestMovement}>
-                  {protest.movement}
-                </ThemedText>
-                <ThemedText style={styles.protestUpdate}>{protest.update}</ThemedText>
-                <ProgressBar value={severityPercent} tint={palette.tint} />
-                <View style={styles.protestStatsRow}>
-                  <View style={styles.protestStat}>
-                    <IconSymbol name="person.3.sequence" size={16} color={palette.tint} />
-                    <ThemedText style={styles.protestStatLabel}>{stats.monitors} field monitors</ThemedText>
-                  </View>
-                  <View style={styles.protestStat}>
-                    <IconSymbol name="waveform" size={16} color={palette.tint} />
-                    <ThemedText style={styles.protestStatLabel}>{stats.updates} verified updates</ThemedText>
-                  </View>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <ThemedView
-          style={[styles.forwardContainer, { borderColor: borderSubtle }]}
-          lightColor={bandAltSurface}
-          darkColor={bandAltSurface}
-        >
-          {forwardFocus.map((item) => (
-            <View key={item.title} style={styles.forwardCard}>
-              <IconSymbol name="sparkle" size={20} color={palette.tint} />
-              <View style={styles.forwardContent}>
-                <ThemedText type="subtitle" style={styles.forwardTitle}>
-                  {item.title}
-                </ThemedText>
-                <ThemedText style={styles.forwardSummary}>{item.summary}</ThemedText>
-              </View>
-            </View>
-          ))}
-        </ThemedView>
-      </SectionBand>
+      
     </ParallaxScrollView>
   );
 }
-
-function SectionBand({
-  title,
-  description,
-  icon,
-  ctaLabel,
-  onPressCta,
-  variant = 'solid',
-  children,
-}: {
-  title: string;
-  description: string;
-  icon: ComponentProps<typeof IconSymbol>['name'];
-  ctaLabel?: string;
-  onPressCta?: () => void;
-  variant?: 'solid' | 'tinted';
-  children: ReactNode;
-}) {
-  const colorScheme = useColorScheme();
-  const palette = Colors[colorScheme ?? 'light'];
-  const solidBackground = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
-  const tintedBackground = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f6f7fb';
-  const background = variant === 'solid' ? solidBackground : tintedBackground;
-  const badgeBackground =
-    variant === 'solid'
-      ? colorScheme === 'dark'
-        ? 'rgba(99, 102, 241, 0.28)'
-        : 'rgba(99, 102, 241, 0.16)'
-      : colorScheme === 'dark'
-        ? 'rgba(148, 163, 184, 0.22)'
-        : 'rgba(148, 163, 184, 0.24)';
-  const borderColor =
-    variant === 'solid'
-      ? palette.stroke ?? (colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.25)' : '#e2e8f0')
-      : 'transparent';
-
-  return (
-    <ThemedView
-      style={[
-        styles.sectionBand,
-        { borderColor },
-        variant === 'tinted' ? styles.sectionBandTinted : null,
-      ]}
-      lightColor={background}
-      darkColor={background}
-    >
-      <View style={styles.sectionBandHeader}>
-        <View style={styles.sectionBandTitleGroup}>
-          <View style={[styles.sectionBandIcon, { backgroundColor: badgeBackground }]}>
-            <IconSymbol name={icon} size={18} color={palette.tint} />
-          </View>
-          <View style={styles.sectionBandText}>
-            <ThemedText type="subtitle" style={styles.sectionBandTitle}>
-              {title}
-            </ThemedText>
-            <ThemedText style={styles.sectionBandDescription}>{description}</ThemedText>
-          </View>
-        </View>
-        {ctaLabel && onPressCta ? (
-          <Pressable onPress={onPressCta} style={styles.sectionBandCta}>
-            <ThemedText
-              type="defaultSemiBold"
-              style={[styles.sectionBandCtaLabel, { color: palette.tint }]}
-            >
-              {ctaLabel}
-            </ThemedText>
-            <IconSymbol name="arrow.up.right" size={16} color={palette.tint} />
-          </Pressable>
-        ) : null}
-      </View>
-      <View style={styles.sectionBandContent}>{children}</View>
-    </ThemedView>
-  );
-}
-
 const styles = StyleSheet.create({
   headerImage: {
     width: '100%',
@@ -1303,15 +881,6 @@ const styles = StyleSheet.create({
   },
   protestStatLabel: {
     fontSize: 13,
-  },
-  progressTrack: {
-    height: 6,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 999,
   },
   indexGrid: {
     flexDirection: 'row',
