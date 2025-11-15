@@ -23,6 +23,28 @@ type HeroHighlight = {
   icon: IconSymbolName;
 };
 
+type FeaturedSeries = {
+  title: string;
+  publisher: string;
+  tagline: string;
+  cadence: string;
+  runtime: string;
+  focusAreas: string[];
+  url: string;
+  image: string;
+  banner: string;
+};
+
+type LatestEpisode = {
+  show: string;
+  title: string;
+  summary: string;
+  runtime: string;
+  releaseDate: string;
+  url: string;
+  image: string;
+};
+
 const heroHighlights: HeroHighlight[] = [
   { label: 'Curated science shows', value: '8 programs', icon: 'rectangle.stack.fill' },
   { label: 'Fresh episodes tracked', value: '24 this week', icon: 'waveform.path.ecg' },
@@ -53,7 +75,7 @@ const quickSpotlights = [
   },
 ];
 
-const featuredSeries = [
+const featuredSeries: FeaturedSeries[] = [
   {
     title: "NASA's Curious Universe",
     publisher: 'NASA',
@@ -64,6 +86,8 @@ const featuredSeries = [
     url: 'https://www.nasa.gov/podcasts/nasas-curious-universe/',
     image:
       'https://www.nasa.gov/wp-content/uploads/2020/06/curious-universe-podcast.jpg',
+    banner:
+      'https://www.nasa.gov/wp-content/uploads/2023/06/ncu-season5-tile.jpg',
   },
   {
     title: 'Science Vs',
@@ -74,6 +98,8 @@ const featuredSeries = [
     focusAreas: ['Health & climate investigations', 'Data-backed myth busting', 'Expert-led interviews'],
     url: 'https://open.spotify.com/show/2VRS1IJCTn2NtKojcDvrxK',
     image:
+      'https://i.scdn.co/image/ab6765630000ba8a0c606b3316d0e6f2fa14de3f',
+    banner:
       'https://i.scdn.co/image/ab6765630000ba8a0c606b3316d0e6f2fa14de3f',
   },
   {
@@ -86,6 +112,8 @@ const featuredSeries = [
     url: 'https://www.wnycstudios.org/podcasts/radiolab',
     image:
       'https://media.wnyc.org/i/1200/900/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
+    banner:
+      'https://media.wnyc.org/i/3000/3000/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
   },
   {
     title: 'Short Wave',
@@ -97,10 +125,12 @@ const featuredSeries = [
     url: 'https://www.npr.org/podcasts/510351/short-wave',
     image:
       'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
+    banner:
+      'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
   },
 ];
 
-const latestEpisodes = [
+const latestEpisodes: LatestEpisode[] = [
   {
     show: 'The Daily',
     title: 'How the Supreme Court reshaped immigration enforcement',
@@ -122,6 +152,17 @@ const latestEpisodes = [
     url: 'https://www.vox.com/podcasts/2024/06/24/24184039/today-explained-ai-chips-trade-war',
     image:
       'https://content.production.cdn.art19.com/images/28/74/21/28742151-9daa-4f5c-a0a9-0f72e0c127fd/6d686293-9490-11e8-bb7a-b7f3b9a3c6b9/TodayExplained2024.jpg',
+  },
+  {
+    show: 'Radiolab',
+    title: 'The Wordless Yet',
+    summary:
+      'Jad Abumrad and Lulu Miller trace the search for language beyond words — from signed conversations to AI translations.',
+    runtime: '52 min',
+    releaseDate: 'June 19, 2024',
+    url: 'https://www.wnycstudios.org/podcasts/radiolab/articles/wordless-yet',
+    image:
+      'https://media.wnyc.org/i/1200/900/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
   },
   {
     show: 'Science Vs',
@@ -325,9 +366,16 @@ export default function PodcastsScreen() {
               darkColor={cardSurface}
             >
               <View style={styles.seriesArtWrap}>
-                <Image source={{ uri: series.image }} style={styles.seriesArt} contentFit="cover" />
+                <Image
+                  source={{
+                    uri: series.banner,
+                  }}
+                  style={styles.seriesArt}
+                  contentFit="cover"
+                  transition={300}
+                />
                 <LinearGradient
-                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.55)']}
+                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.4)']}
                   style={styles.seriesArtOverlay}
                 />
                 <View style={styles.seriesArtBadge}>
@@ -335,10 +383,25 @@ export default function PodcastsScreen() {
                 </View>
               </View>
               <View style={styles.seriesBody}>
-                <ThemedText type="subtitle" style={styles.seriesTitle}>
-                  {series.title}
-                </ThemedText>
-                <ThemedText style={styles.seriesPublisher}>{series.publisher}</ThemedText>
+                <View style={styles.seriesHeadingRow}>
+                  <LinearGradient
+                    colors={palette.secondaryGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.seriesAvatarHalo}
+                  >
+                    <View style={styles.seriesAvatarInner}>
+                      <Image source={{ uri: series.image }} style={styles.seriesAvatarImage} contentFit="cover" />
+                    </View>
+                  </LinearGradient>
+
+                  <View style={styles.seriesHeadingCopy}>
+                    <ThemedText type="subtitle" style={styles.seriesTitle}>
+                      {series.title}
+                    </ThemedText>
+                    <ThemedText style={styles.seriesPublisher}>{series.publisher}</ThemedText>
+                  </View>
+                </View>
                 <ThemedText style={styles.seriesTagline}>{series.tagline}</ThemedText>
 
                 <View style={styles.seriesMeta}>
@@ -410,10 +473,23 @@ export default function PodcastsScreen() {
 
               <View style={styles.episodeBody}>
                 <View style={styles.episodeHeader}>
-                  <ThemedText type="defaultSemiBold" style={styles.episodeShow}>
-                    {episode.show}
-                  </ThemedText>
-                  <ThemedText style={styles.episodeMeta}>{episode.releaseDate}</ThemedText>
+                  <LinearGradient
+                    colors={palette.secondaryGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.episodeAvatarHalo}
+                  >
+                    <View style={styles.episodeAvatarInner}>
+                      <Image source={{ uri: episode.image }} style={styles.episodeAvatarImage} contentFit="cover" />
+                    </View>
+                  </LinearGradient>
+
+                  <View style={styles.episodeHeaderCopy}>
+                    <ThemedText type="defaultSemiBold" style={styles.episodeShow}>
+                      {episode.show}
+                    </ThemedText>
+                    <ThemedText style={styles.episodeMeta}>{episode.releaseDate}</ThemedText>
+                  </View>
                 </View>
                 <ThemedText type="subtitle" style={styles.episodeTitle}>
                   {episode.title}
@@ -653,7 +729,16 @@ const styles = StyleSheet.create({
   },
   seriesBody: {
     padding: 20,
-    gap: 12,
+    gap: 16,
+  },
+  seriesHeadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  seriesHeadingCopy: {
+    flex: 1,
+    gap: 4,
   },
   seriesTitle: {
     fontSize: 22,
@@ -662,6 +747,21 @@ const styles = StyleSheet.create({
   seriesPublisher: {
     fontSize: 14,
     color: 'rgba(100, 116, 139, 1)',
+  },
+  seriesAvatarHalo: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    padding: 3,
+  },
+  seriesAvatarInner: {
+    flex: 1,
+    borderRadius: 17,
+    overflow: 'hidden',
+  },
+  seriesAvatarImage: {
+    width: '100%',
+    height: '100%',
   },
   seriesTagline: {
     fontSize: 16,
@@ -743,8 +843,27 @@ const styles = StyleSheet.create({
   },
   episodeHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 14,
+  },
+  episodeAvatarHalo: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    padding: 3,
+  },
+  episodeAvatarInner: {
+    flex: 1,
+    borderRadius: 13,
+    overflow: 'hidden',
+  },
+  episodeAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  episodeHeaderCopy: {
+    flex: 1,
+    gap: 4,
   },
   episodeShow: {
     fontSize: 16,
