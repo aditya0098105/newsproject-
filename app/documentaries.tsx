@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import { Video, ResizeMode } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio, Video, ResizeMode } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, Animated, Easing, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -16,6 +17,10 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { isStreamingUrl, resolveVideoSource } from '@/utils/media';
 
+const INTRO_STORAGE_KEY = '@documentaries/intro-experience-shown';
+const INTRO_SOUND_URL =
+  'https://cdn.pixabay.com/download/audio/2023/04/12/audio_eb41e2d0ea.mp3?filename=whoosh-139103.mp3';
+
 export default function DocumentaryLibraryScreen() {
   const params = useLocalSearchParams<{ slug?: string }>();
   const colorScheme = useColorScheme();
@@ -24,6 +29,11 @@ export default function DocumentaryLibraryScreen() {
   const tagSurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.18)' : 'rgba(15, 118, 110, 0.12)';
   const borderSubtle = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.24)' : '#e2e8f0';
   const cardAnimations = useRef(documentaryLibrary.map(() => new Animated.Value(0))).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const overlayScale = useRef(new Animated.Value(0.92)).current;
+  const introAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const isMountedRef = useRef(true);
   const router = useRouter();
   const [selectedSlug, setSelectedSlug] = useState<string | null>(() => {
     if (typeof params.slug === 'string') {
@@ -33,6 +43,13 @@ export default function DocumentaryLibraryScreen() {
     return documentaryLibrary[0]?.slug ?? null;
   });
   const videoRef = useRef<Video | null>(null);
+  const [isIntroVisible, setIsIntroVisible] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof params.slug === 'string' && params.slug !== selectedSlug) {
@@ -132,13 +149,114 @@ export default function DocumentaryLibraryScreen() {
     }, [cardAnimations]),
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const playIntroExperience = async () => {
+        try {
+          const stored = await AsyncStorage.getItem(INTRO_STORAGE_KEY);
+
+          if (!isActive || stored === 'true') {
+            return;
+          }
+
+          overlayOpacity.setValue(0);
+          overlayScale.setValue(0.92);
+
+          if (!isActive) {
+            return;
+          }
+
+          setIsIntroVisible(true);
+
+          try {
+            const sound = new Audio.Sound();
+            soundRef.current = sound;
+            await sound.loadAsync({ uri: INTRO_SOUND_URL }, { volume: 0.85 });
+
+            if (isActive) {
+              await sound.replayAsync();
+            }
+          } catch (error) {
+            console.warn('Documentaries intro audio failed to play', error);
+          }
+
+          const animation = Animated.sequence([
+            Animated.parallel([
+              Animated.timing(overlayOpacity, {
+                toValue: 1,
+                duration: 360,
+                easing: Easing.out(Easing.quad),
+                useNativeDriver: true,
+              }),
+              Animated.timing(overlayScale, {
+                toValue: 1,
+                duration: 360,
+                easing: Easing.out(Easing.quad),
+                useNativeDriver: true,
+              }),
+            ]),
+            Animated.delay(1200),
+            Animated.timing(overlayOpacity, {
+              toValue: 0,
+              duration: 420,
+              easing: Easing.in(Easing.quad),
+              useNativeDriver: true,
+            }),
+          ]);
+
+          introAnimationRef.current = animation;
+
+          animation.start(({ finished }) => {
+            if (soundRef.current) {
+              void soundRef.current.unloadAsync();
+              soundRef.current = null;
+            }
+
+            if (finished && isActive) {
+              setIsIntroVisible(false);
+            }
+          });
+
+          await AsyncStorage.setItem(INTRO_STORAGE_KEY, 'true');
+        } catch (error) {
+          console.warn('Documentaries intro experience failed to play', error);
+        }
+      };
+
+      void playIntroExperience();
+
+      return () => {
+        isActive = false;
+        introAnimationRef.current?.stop();
+        introAnimationRef.current = null;
+        overlayOpacity.stopAnimation();
+        overlayScale.stopAnimation();
+        if (soundRef.current) {
+          void soundRef.current.unloadAsync();
+          soundRef.current = null;
+        }
+        if (isMountedRef.current) {
+          setIsIntroVisible(false);
+        }
+      };
+    }, [overlayOpacity, overlayScale]),
+  );
+
+  const overlayBackdrop = colorScheme === 'dark' ? 'rgba(2, 6, 23, 0.9)' : 'rgba(15, 23, 42, 0.88)';
+  const overlaySurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.92)' : 'rgba(241, 245, 249, 0.94)';
+  const overlayTitleColor = colorScheme === 'dark' ? '#f8fafc' : '#0f172a';
+  const overlaySubtitleColor = colorScheme === 'dark' ? 'rgba(226, 232, 240, 0.75)' : 'rgba(15, 23, 42, 0.7)';
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#0f172a', dark: '#020617' }}
-      headerImage={
-        <View style={styles.heroContainer}>
-          <Image
-            source={{
+    <View style={styles.screen}>
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#0f172a', dark: '#020617' }}
+        headerImage={
+          <View style={styles.heroContainer}>
+            <Image
+              source={{
               uri: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80',
             }}
             style={StyleSheet.absoluteFillObject}
@@ -320,11 +438,44 @@ export default function DocumentaryLibraryScreen() {
           </Pressable>
         </Animated.View>
       ))}
-    </ParallaxScrollView>
+      </ParallaxScrollView>
+
+      {isIntroVisible && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.introOverlay,
+            { backgroundColor: overlayBackdrop, opacity: overlayOpacity },
+          ]}
+        >
+          <Animated.View
+            style={[
+              styles.introOverlayContent,
+              { backgroundColor: overlaySurface, transform: [{ scale: overlayScale }] },
+            ]}
+          >
+            <View style={styles.introOverlayBadge}>
+              <IconSymbol name="film.fill" size={24} color={palette.tint} />
+              <ThemedText style={[styles.introOverlayBadgeText, { color: palette.tint }]}>Premiere Mode</ThemedText>
+            </View>
+            <ThemedText type="title" style={[styles.introOverlayTitle, { color: overlayTitleColor }]}>
+              Welcome to Documentaries
+            </ThemedText>
+            <ThemedText style={[styles.introOverlaySubtitle, { color: overlaySubtitleColor }]}>
+              Sit back for a moment while we set the stage for award-winning storytelling.
+            </ThemedText>
+          </Animated.View>
+        </Animated.View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    position: 'relative',
+  },
   viewerSection: {
     marginHorizontal: 20,
     marginBottom: 24,
@@ -544,5 +695,45 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 10 },
     elevation: 8,
+  },
+  introOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  introOverlayContent: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: 28,
+    paddingVertical: 36,
+    paddingHorizontal: 28,
+    alignItems: 'center',
+    gap: 18,
+  },
+  introOverlayBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(20, 184, 166, 0.12)',
+  },
+  introOverlayBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  introOverlayTitle: {
+    fontSize: 28,
+    textAlign: 'center',
+    lineHeight: 34,
+  },
+  introOverlaySubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
