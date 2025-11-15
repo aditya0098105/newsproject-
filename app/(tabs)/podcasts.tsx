@@ -368,11 +368,10 @@ export default function PodcastsScreen() {
               <View style={styles.seriesArtWrap}>
                 <Image
                   source={{
-                    uri: series.banner,
+                    uri: series.banner ?? series.image,
                   }}
                   style={styles.seriesArt}
                   contentFit="cover"
-                  transition={300}
                 />
                 <LinearGradient
                   colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.4)']}
@@ -394,7 +393,6 @@ export default function PodcastsScreen() {
                       <Image source={{ uri: series.image }} style={styles.seriesAvatarImage} contentFit="cover" />
                     </View>
                   </LinearGradient>
-
                   <View style={styles.seriesHeadingCopy}>
                     <ThemedText type="subtitle" style={styles.seriesTitle}>
                       {series.title}
@@ -483,7 +481,6 @@ export default function PodcastsScreen() {
                       <Image source={{ uri: episode.image }} style={styles.episodeAvatarImage} contentFit="cover" />
                     </View>
                   </LinearGradient>
-
                   <View style={styles.episodeHeaderCopy}>
                     <ThemedText type="defaultSemiBold" style={styles.episodeShow}>
                       {episode.show}
@@ -740,14 +737,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
   },
-  seriesTitle: {
-    fontSize: 22,
-    lineHeight: 28,
-  },
-  seriesPublisher: {
-    fontSize: 14,
-    color: 'rgba(100, 116, 139, 1)',
-  },
   seriesAvatarHalo: {
     width: 72,
     height: 72,
@@ -762,6 +751,14 @@ const styles = StyleSheet.create({
   seriesAvatarImage: {
     width: '100%',
     height: '100%',
+  },
+  seriesTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+  },
+  seriesPublisher: {
+    fontSize: 14,
+    color: 'rgba(100, 116, 139, 1)',
   },
   seriesTagline: {
     fontSize: 16,
@@ -844,26 +841,26 @@ const styles = StyleSheet.create({
   episodeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
+  },
+  episodeHeaderCopy: {
+    flex: 1,
+    gap: 4,
   },
   episodeAvatarHalo: {
     width: 56,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 3,
   },
   episodeAvatarInner: {
     flex: 1,
-    borderRadius: 13,
+    borderRadius: 15,
     overflow: 'hidden',
   },
   episodeAvatarImage: {
     width: '100%',
     height: '100%',
-  },
-  episodeHeaderCopy: {
-    flex: 1,
-    gap: 4,
   },
   episodeShow: {
     fontSize: 16,
