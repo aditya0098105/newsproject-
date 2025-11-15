@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
 import { Image } from 'expo-image';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -41,6 +41,43 @@ const heroMetrics = [
   { label: 'Policy briefings / week', value: '42' },
   { label: 'Investigations active', value: '23' },
 ];
+
+const governanceSignalLabels = ['Transparency', 'Civic trust', 'Crisis readiness'];
+
+const governanceScoreTier = (score: number) => {
+  if (score >= 85) {
+    return { label: 'Benchmark leader', tone: 'Stability at scale' };
+  }
+  if (score >= 75) {
+    return { label: 'Strong performer', tone: 'Consistent reforms' };
+  }
+  if (score >= 65) {
+    return { label: 'Steady climb', tone: 'Institutional upgrades' };
+  }
+  return { label: 'In focus', tone: 'Reform momentum building' };
+};
+
+const describeGovernanceSignal = (score: number, label: string) => {
+  switch (label) {
+    case 'Transparency':
+      return `${70 + Math.round(score / 4)}% open data`;
+    case 'Civic trust':
+      return `${55 + Math.round(score / 5)}% positive sentiment`;
+    case 'Crisis readiness':
+    default:
+      return `${60 + Math.round(score / 6)}% response capacity`;
+  }
+};
+
+const deriveProtestMonitors = (severity: number, index: number) => ({
+  monitors: 12 + Math.round(severity * 18) + index * 2,
+  updates: 3 + index * 2,
+});
+
+const deriveDocumentaryMomentum = (index: number) => ({
+  watchlists: 120 + index * 36,
+  regions: 4 + index,
+});
 
 const quickActions = [
   {
@@ -124,7 +161,6 @@ export default function HomeScreen() {
   const borderSubtle = colorScheme === 'dark' ? palette.stroke ?? 'rgba(148, 163, 184, 0.25)' : palette.stroke ?? '#e2e8f0';
   const highlightSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.72)' : palette.card ?? '#ffffff';
   const featureSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.85)' : '#0f172a';
-  const panelSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.7)' : palette.card ?? '#ffffff';
   const tintedSurface = colorScheme === 'dark' ? 'rgba(99, 102, 241, 0.28)' : 'rgba(99, 102, 241, 0.12)';
   const heroBadgeForeground = colorScheme === 'dark' ? '#f8fafc' : palette.background;
   const heroBadgeBackground = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.88)' : '#ffffff';
@@ -141,9 +177,14 @@ export default function HomeScreen() {
   const activeHeadline = heroHeadlines[activeHeadlineIndex];
   const primaryActions = quickActions.filter((action) => action.priority === 'primary');
   const secondaryActions = quickActions.filter((action) => action.priority === 'secondary');
-  const bandSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
   const bandAltSurface = colorScheme === 'dark' ? 'rgba(30, 41, 59, 0.72)' : '#f5f7ff';
   const tertiarySurface = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.12)' : '#f1f5f9';
+  const documentaryFeatureGlow = colorScheme === 'dark' ? 'rgba(15,23,42,0.8)' : 'rgba(15, 23, 42, 0.88)';
+  const governanceCardSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
+  const protestCardSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.78)' : palette.card ?? '#ffffff';
+  const protestAccent = colorScheme === 'dark' ? palette.tint : '#4338ca';
+  const [featuredDocumentary, ...supportingDocumentaries] = documentarySpotlight;
+  const featuredMomentum = featuredDocumentary ? deriveDocumentaryMomentum(0) : null;
 
   const handleOpenDocumentary = useCallback(
     (slug: string) => {
@@ -431,99 +472,114 @@ export default function HomeScreen() {
         onPressCta={() => router.push('/documentaries')}
         variant="solid"
       >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.documentaryCarousel}
-        >
-          {documentarySpotlight.map((feature, index) => (
-            <Pressable
-              key={feature.slug}
-              onPress={() => handleOpenDocumentary(feature.slug)}
-              style={[
-                styles.documentaryCard,
-                {
-                  backgroundColor: featureSurface,
-                  borderColor: borderSubtle,
-                  marginLeft: index === 0 ? 4 : 0,
-                },
-              ]}
-            >
-              <Image source={{ uri: feature.image }} style={styles.documentaryMedia} contentFit="cover" />
-              <LinearGradient
-                colors={['rgba(15,23,42,0.1)', 'rgba(15,23,42,0.92)']}
-                style={styles.documentaryOverlay}
-              />
-              <View style={styles.documentaryInfo}>
-                <View style={styles.documentaryMetaRow}>
-                  <View style={[styles.documentaryBadge, { backgroundColor: documentaryBadgeSurface }]}>
-                    <IconSymbol name="sparkles" size={14} color={documentaryBadgeText} />
-                    <ThemedText
-                      type="defaultSemiBold"
-                      style={styles.documentaryBadgeLabel}
-                      lightColor={documentaryBadgeText}
-                      darkColor={documentaryBadgeText}
-                    >
-                      Spotlight
-                    </ThemedText>
-                  </View>
-                  <ThemedText
-                    style={styles.documentaryDuration}
-                    lightColor={documentaryDurationText}
-                    darkColor={documentaryDurationText}
-                  >
-                    {feature.duration}
-                  </ThemedText>
-                </View>
-
-                <ThemedText
-                  type="subtitle"
-                  style={styles.documentaryTitle}
-                  lightColor="#f8fafc"
-                  darkColor="#f8fafc"
-                >
-                  {feature.title}
-                </ThemedText>
-                <ThemedText
-                  style={styles.documentarySummary}
-                  lightColor={documentarySummaryText}
-                  darkColor={documentarySummaryText}
-                >
-                  {feature.summary}
-                </ThemedText>
-
-                <View style={styles.documentaryTags}>
-                  {feature.tags.slice(0, 2).map((tag) => (
-                    <View
-                      key={`${feature.slug}-${tag}`}
-                      style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}
-                    >
-                      <ThemedText
-                        style={styles.documentaryTagLabel}
-                        lightColor={documentaryTagText}
-                        darkColor={documentaryTagText}
-                      >
-                        {tag}
-                      </ThemedText>
-                    </View>
-                  ))}
-                </View>
-
-                <View style={styles.documentaryAction}>
-                  <IconSymbol name="play.fill" size={16} color={palette.tint} />
+        {featuredDocumentary ? (
+          <Pressable
+            onPress={() => handleOpenDocumentary(featuredDocumentary.slug)}
+            style={[
+              styles.documentaryFeature,
+              { borderColor: borderSubtle, backgroundColor: featureSurface },
+            ]}
+          >
+            <Image source={{ uri: featuredDocumentary.image }} style={styles.documentaryFeatureImage} contentFit="cover" />
+            <LinearGradient
+              colors={['rgba(15,23,42,0.15)', documentaryFeatureGlow]}
+              style={styles.documentaryFeatureOverlay}
+            />
+            <View style={styles.documentaryFeatureContent}>
+              <View style={styles.documentaryMetaRow}>
+                <View style={[styles.documentaryBadge, { backgroundColor: documentaryBadgeSurface }]}>
+                  <IconSymbol name="sparkles" size={14} color={documentaryBadgeText} />
                   <ThemedText
                     type="defaultSemiBold"
-                    style={styles.documentaryActionLabel}
-                    lightColor={palette.tint}
-                    darkColor={palette.tint}
+                    style={styles.documentaryBadgeLabel}
+                    lightColor={documentaryBadgeText}
+                    darkColor={documentaryBadgeText}
                   >
-                    Watch trailer
+                    Field feature
                   </ThemedText>
                 </View>
+                <ThemedText
+                  style={styles.documentaryDuration}
+                  lightColor={documentaryDurationText}
+                  darkColor={documentaryDurationText}
+                >
+                  {featuredDocumentary.duration}
+                </ThemedText>
               </View>
-            </Pressable>
-          ))}
-        </ScrollView>
+              <ThemedText type="subtitle" style={styles.documentaryFeatureTitle} lightColor="#f8fafc" darkColor="#f8fafc">
+                {featuredDocumentary.title}
+              </ThemedText>
+              <ThemedText style={styles.documentaryFeatureSummary} lightColor={documentarySummaryText} darkColor={documentarySummaryText}>
+                {featuredDocumentary.summary}
+              </ThemedText>
+              <View style={styles.documentaryMomentumRow}>
+                <View style={styles.documentaryMomentumItem}>
+                  <IconSymbol name="star.fill" size={16} color={palette.tint} />
+                  <View>
+                    <ThemedText type="defaultSemiBold" style={styles.documentaryMomentumValue} lightColor={palette.tint} darkColor={palette.tint}>
+                      {featuredMomentum?.watchlists}+ watchlists
+                    </ThemedText>
+                    <ThemedText style={styles.documentaryMomentumLabel}>
+                      Across {featuredMomentum?.regions} regions
+                    </ThemedText>
+                  </View>
+                </View>
+                <View style={styles.documentaryMomentumItem}>
+                  <IconSymbol name="film.fill" size={16} color={palette.tint} />
+                  <View>
+                    <ThemedText type="defaultSemiBold" style={styles.documentaryMomentumValue} lightColor={palette.tint} darkColor={palette.tint}>
+                      {featuredDocumentary.tags[0]}
+                    </ThemedText>
+                    <ThemedText style={styles.documentaryMomentumLabel}>Primary focus</ThemedText>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.documentaryAction}>
+                <IconSymbol name="play.fill" size={16} color={palette.tint} />
+                <ThemedText type="defaultSemiBold" style={styles.documentaryActionLabel} lightColor={palette.tint} darkColor={palette.tint}>
+                  Watch trailer
+                </ThemedText>
+              </View>
+            </View>
+          </Pressable>
+        ) : null}
+        {supportingDocumentaries.length > 0 ? (
+          <View style={styles.documentarySupportGrid}>
+            {supportingDocumentaries.map((feature, index) => {
+              const momentum = deriveDocumentaryMomentum(index + 1);
+              return (
+                <Pressable
+                  key={feature.slug}
+                  onPress={() => handleOpenDocumentary(feature.slug)}
+                  style={[styles.documentarySupportCard, { borderColor: borderSubtle, backgroundColor: palette.background }]}
+                >
+                  <Image source={{ uri: feature.image }} style={styles.documentarySupportImage} contentFit="cover" />
+                  <View style={styles.documentarySupportContent}>
+                    <View style={styles.documentarySupportHeader}>
+                      <ThemedText type="subtitle" style={styles.documentarySupportTitle}>
+                        {feature.title}
+                      </ThemedText>
+                      <ThemedText style={styles.documentarySupportDuration}>{feature.duration}</ThemedText>
+                    </View>
+                    <ThemedText style={styles.documentarySupportSummary}>{feature.summary}</ThemedText>
+                    <View style={styles.documentarySupportStats}>
+                      <View style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}> 
+                        <ThemedText style={styles.documentaryTagLabel} lightColor={documentaryTagText} darkColor={documentaryTagText}>
+                          {momentum.watchlists}+ saved
+                        </ThemedText>
+                      </View>
+                      <View style={[styles.documentaryTag, { backgroundColor: documentaryTagSurface }]}> 
+                        <ThemedText style={styles.documentaryTagLabel} lightColor={documentaryTagText} darkColor={documentaryTagText}>
+                          {feature.tags[0]}
+                        </ThemedText>
+                      </View>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
       </SectionBand>
 
       <SectionBand
@@ -534,39 +590,62 @@ export default function HomeScreen() {
         onPressCta={() => router.push('/governance-index')}
         variant="tinted"
       >
-        <ThemedView
-          style={[styles.indexContainer, { borderColor: borderSubtle }]}
-          lightColor={bandSurface}
-          darkColor={bandSurface}
-        >
-          {governanceSpotlight.map((entry) => (
-            <Pressable
-              key={entry.country}
-              onPress={() => router.push('/governance-index')}
-              style={styles.indexRow}
-            >
-              <View style={styles.indexHeader}>
-                <ThemedText type="subtitle" style={styles.indexCountry}>
-                  {entry.country}
-                </ThemedText>
-                <View style={styles.indexScoreGroup}>
-                  <IconSymbol name="shield.lefthalf.filled" size={16} color={palette.tint} />
-                  <ThemedText type="defaultSemiBold" style={styles.indexScore}>
+        <View style={styles.indexGrid}>
+          {governanceSpotlight.map((entry) => {
+            const tier = governanceScoreTier(entry.score);
+            return (
+              <Pressable
+                key={entry.country}
+                onPress={() => router.push('/governance-index')}
+                style={[styles.indexCard, { borderColor: borderSubtle, backgroundColor: governanceCardSurface }]}
+              >
+                <View style={styles.indexCardHeader}>
+                  <View>
+                    <ThemedText type="subtitle" style={styles.indexCountry}>
+                      {entry.country}
+                    </ThemedText>
+                    <ThemedText style={styles.indexTone}>{tier.tone}</ThemedText>
+                  </View>
+                  <View style={[styles.indexTierBadge, { backgroundColor: tintedSurface }]}> 
+                    <IconSymbol name="shield.lefthalf.filled" size={14} color={palette.tint} />
+                    <ThemedText style={[styles.indexTierLabel, { color: palette.tint }]}>{tier.label}</ThemedText>
+                  </View>
+                </View>
+                <View style={styles.indexScoreWrap}>
+                  <ThemedText type="title" style={styles.indexScoreLarge}>
                     {entry.score}
                   </ThemedText>
+                  <View style={styles.indexChangePill}>
+                    <IconSymbol
+                      name={entry.change >= 0 ? 'arrow.up' : 'arrow.down'}
+                      size={14}
+                      color={entry.change >= 0 ? palette.tint : '#f97316'}
+                    />
+                    <ThemedText
+                      style={[
+                        styles.indexChangeLabel,
+                        { color: entry.change >= 0 ? palette.tint : '#f97316' },
+                      ]}
+                    >
+                      {entry.change >= 0 ? `+${entry.change}` : entry.change} pts
+                    </ThemedText>
+                  </View>
                 </View>
-              </View>
-              <ProgressBar value={entry.score} tint={palette.tint} />
-              <ThemedText style={styles.indexDelta}>
-                {entry.change > 0
-                  ? `▲ ${entry.change} this week`
-                  : entry.change < 0
-                    ? `▼ ${Math.abs(entry.change)} this week`
-                    : 'Unchanged'}
-              </ThemedText>
-            </Pressable>
-          ))}
-        </ThemedView>
+                <ProgressBar value={entry.score} tint={palette.tint} />
+                <View style={styles.indexSignalRow}>
+                  {governanceSignalLabels.map((label) => (
+                    <View key={`${entry.country}-${label}`} style={styles.indexSignal}>
+                      <ThemedText style={styles.indexSignalLabel}>{label}</ThemedText>
+                      <ThemedText type="defaultSemiBold" style={styles.indexSignalValue}>
+                        {describeGovernanceSignal(entry.score, label)}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
       </SectionBand>
 
       <SectionBand
@@ -577,32 +656,56 @@ export default function HomeScreen() {
         onPressCta={() => router.push('/protests')}
         variant="solid"
       >
-        <ThemedView
-          style={[styles.panelCard, { borderColor: borderSubtle }]}
-          lightColor={panelSurface}
-          darkColor={panelSurface}
-        >
-          {protestWatchHighlights.map((protest) => (
-            <Pressable
-              key={protest.slug}
-              onPress={() => router.push('/protests')}
-              style={styles.protestRow}
-            >
-              <View style={styles.protestHeader}>
-                <ThemedText type="subtitle" style={styles.protestRegion}>
-                  {protest.region}
-                </ThemedText>
-                <View style={[styles.statusChip, { backgroundColor: tintedSurface }]}>
-                  <IconSymbol name="dot.radiowaves.up.forward" size={14} color={palette.tint} />
-                  <ThemedText style={[styles.statusLabel, { color: palette.tint }]}>{protest.status}</ThemedText>
+        <View style={styles.protestGrid}>
+          {protestWatchHighlights.map((protest, index) => {
+            const severityPercent = Math.round(protest.severity * 100);
+            const stats = deriveProtestMonitors(protest.severity, index);
+            return (
+              <Pressable
+                key={protest.slug}
+                onPress={() => router.push('/protests')}
+                style={({ pressed }) => [
+                  styles.protestCard,
+                  {
+                    borderColor: borderSubtle,
+                    backgroundColor: protestCardSurface,
+                  },
+                  pressed && styles.protestCardPressed,
+                ]}
+              >
+                <View style={styles.protestCardHeader}>
+                  <View>
+                    <ThemedText type="subtitle" style={styles.protestRegion}>
+                      {protest.region}
+                    </ThemedText>
+                    <ThemedText style={styles.protestStatus}>{protest.status}</ThemedText>
+                  </View>
+                  <View style={[styles.protestSeverityBadge, { borderColor: protestAccent }]}> 
+                    <ThemedText type="defaultSemiBold" style={[styles.protestSeverityValue, { color: protestAccent }]}>
+                      {severityPercent}%
+                    </ThemedText>
+                    <ThemedText style={[styles.protestSeverityLabel, { color: protestAccent }]}>Intensity</ThemedText>
+                  </View>
                 </View>
-              </View>
-              <ThemedText style={styles.protestMovement}>{protest.movement}</ThemedText>
-              <ThemedText style={styles.protestUpdate}>{protest.update}</ThemedText>
-              <ProgressBar value={protest.severity * 100} tint={palette.tint} />
-            </Pressable>
-          ))}
-        </ThemedView>
+                <ThemedText type="subtitle" style={styles.protestMovement}>
+                  {protest.movement}
+                </ThemedText>
+                <ThemedText style={styles.protestUpdate}>{protest.update}</ThemedText>
+                <ProgressBar value={severityPercent} tint={palette.tint} />
+                <View style={styles.protestStatsRow}>
+                  <View style={styles.protestStat}>
+                    <IconSymbol name="person.3.sequence" size={16} color={palette.tint} />
+                    <ThemedText style={styles.protestStatLabel}>{stats.monitors} field monitors</ThemedText>
+                  </View>
+                  <View style={styles.protestStat}>
+                    <IconSymbol name="waveform" size={16} color={palette.tint} />
+                    <ThemedText style={styles.protestStatLabel}>{stats.updates} verified updates</ThemedText>
+                  </View>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
 
         <ThemedView
           style={[styles.forwardContainer, { borderColor: borderSubtle }]}
@@ -998,36 +1101,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     opacity: 0.7,
   },
-  documentaryCarousel: {
-    paddingBottom: 4,
-    paddingRight: 24,
-  },
-  documentaryCard: {
-    width: 280,
-    height: 320,
-    borderRadius: 24,
-    overflow: 'hidden',
+  documentaryFeature: {
+    borderRadius: 28,
     borderWidth: 1,
-    marginRight: 16,
-    shadowColor: '#0f172a',
-    shadowOpacity: 0.18,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 6,
+    overflow: 'hidden',
+    marginBottom: 18,
+    minHeight: 320,
   },
-  documentaryMedia: {
+  documentaryFeatureImage: {
     ...StyleSheet.absoluteFillObject,
   },
-  documentaryOverlay: {
+  documentaryFeatureOverlay: {
     ...StyleSheet.absoluteFillObject,
   },
-  documentaryInfo: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: 20,
-    gap: 10,
+  documentaryFeatureContent: {
+    padding: 24,
+    gap: 12,
+    minHeight: 320,
+    justifyContent: 'flex-end',
   },
   documentaryMetaRow: {
     flexDirection: 'row',
@@ -1052,13 +1143,14 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  documentaryTitle: {
-    fontSize: 22,
-    lineHeight: 28,
+  documentaryFeatureTitle: {
+    fontSize: 26,
+    lineHeight: 32,
   },
-  documentarySummary: {
-    fontSize: 14,
-    lineHeight: 20,
+  documentaryFeatureSummary: {
+    fontSize: 15,
+    lineHeight: 22,
+    opacity: 0.9,
   },
   documentaryTags: {
     flexDirection: 'row',
@@ -1085,35 +1177,108 @@ const styles = StyleSheet.create({
   documentaryActionLabel: {
     fontSize: 14,
   },
-  panelCard: {
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    gap: 20,
+  documentaryMomentumRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  protestRow: {
-    gap: 8,
-  },
-  protestHeader: {
+  documentaryMomentumItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+  },
+  documentaryMomentumValue: {
+    fontSize: 15,
+  },
+  documentaryMomentumLabel: {
+    fontSize: 12,
+    opacity: 0.75,
+  },
+  documentarySupportGrid: {
+    gap: 14,
+  },
+  documentarySupportCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  documentarySupportImage: {
+    width: '100%',
+    height: 180,
+  },
+  documentarySupportContent: {
+    padding: 18,
+    gap: 10,
+  },
+  documentarySupportHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: 10,
+  },
+  documentarySupportTitle: {
+    flex: 1,
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  documentarySupportDuration: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    opacity: 0.7,
+  },
+  documentarySupportSummary: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.8,
+  },
+  documentarySupportStats: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   protestRegion: {
     fontSize: 18,
   },
-  statusChip: {
+  protestGrid: {
+    gap: 14,
+  },
+  protestCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    gap: 10,
+  },
+  protestCardPressed: {
+    transform: [{ scale: 0.995 }],
+    opacity: 0.92,
+  },
+  protestCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
+    justifyContent: 'space-between',
   },
-  statusLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+  protestStatus: {
+    fontSize: 13,
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    opacity: 0.7,
+  },
+  protestSeverityBadge: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignItems: 'flex-end',
+  },
+  protestSeverityValue: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  protestSeverityLabel: {
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   protestMovement: {
     fontSize: 15,
@@ -1124,6 +1289,21 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     opacity: 0.85,
   },
+  protestStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 6,
+  },
+  protestStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  protestStatLabel: {
+    fontSize: 13,
+  },
   progressTrack: {
     height: 6,
     borderRadius: 999,
@@ -1133,34 +1313,84 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 999,
   },
-  indexContainer: {
-    borderRadius: 20,
-    padding: 20,
-    gap: 18,
+  indexGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+  },
+  indexCard: {
+    flex: 1,
+    minWidth: '48%',
+    borderRadius: 22,
     borderWidth: 1,
+    padding: 18,
+    gap: 12,
   },
-  indexRow: {
-    gap: 6,
-  },
-  indexHeader: {
+  indexCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 10,
   },
   indexCountry: {
     fontSize: 18,
   },
-  indexScoreGroup: {
+  indexTone: {
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  indexTierBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
   },
-  indexScore: {
-    fontSize: 18,
+  indexTierLabel: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
-  indexDelta: {
+  indexScoreWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  indexScoreLarge: {
+    fontSize: 36,
+    lineHeight: 40,
+  },
+  indexChangePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+  },
+  indexChangeLabel: {
     fontSize: 13,
+    fontWeight: '600',
+  },
+  indexSignalRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  indexSignal: {
+    flexBasis: '48%',
+    gap: 2,
+  },
+  indexSignalLabel: {
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     opacity: 0.7,
+  },
+  indexSignalValue: {
+    fontSize: 14,
   },
   forwardContainer: {
     borderRadius: 20,
