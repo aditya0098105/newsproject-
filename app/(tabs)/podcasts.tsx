@@ -23,6 +23,18 @@ type HeroHighlight = {
   icon: IconSymbolName;
 };
 
+type FeaturedSeries = {
+  title: string;
+  publisher: string;
+  tagline: string;
+  cadence: string;
+  runtime: string;
+  focusAreas: string[];
+  url: string;
+  image: string;
+  banner: string;
+};
+
 const heroHighlights: HeroHighlight[] = [
   { label: 'Curated science shows', value: '8 programs', icon: 'rectangle.stack.fill' },
   { label: 'Fresh episodes tracked', value: '24 this week', icon: 'waveform.path.ecg' },
@@ -53,7 +65,7 @@ const quickSpotlights = [
   },
 ];
 
-const featuredSeries = [
+const featuredSeries: FeaturedSeries[] = [
   {
     title: "NASA's Curious Universe",
     publisher: 'NASA',
@@ -64,6 +76,8 @@ const featuredSeries = [
     url: 'https://www.nasa.gov/podcasts/nasas-curious-universe/',
     image:
       'https://www.nasa.gov/wp-content/uploads/2020/06/curious-universe-podcast.jpg',
+    banner:
+      'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80',
   },
   {
     title: 'Science Vs',
@@ -75,6 +89,8 @@ const featuredSeries = [
     url: 'https://open.spotify.com/show/2VRS1IJCTn2NtKojcDvrxK',
     image:
       'https://i.scdn.co/image/ab6765630000ba8a0c606b3316d0e6f2fa14de3f',
+    banner:
+      'https://images.unsplash.com/photo-1521790797524-b2497295b8a0?auto=format&fit=crop&w=1600&q=80',
   },
   {
     title: 'Radiolab',
@@ -86,6 +102,8 @@ const featuredSeries = [
     url: 'https://www.wnycstudios.org/podcasts/radiolab',
     image:
       'https://media.wnyc.org/i/1200/900/l/80/1/Radiolab_Podcast_Thumbnail_2023.png',
+    banner:
+      'https://images.unsplash.com/photo-1470165285405-0a611f0de6fd?auto=format&fit=crop&w=1600&q=80',
   },
   {
     title: 'Short Wave',
@@ -97,6 +115,8 @@ const featuredSeries = [
     url: 'https://www.npr.org/podcasts/510351/short-wave',
     image:
       'https://media.npr.org/assets/img/2023/09/12/shortwave_template_3000x3000_custom-4f18ddac188f1114fab7196e1873efa0a154266e.jpg',
+    banner:
+      'https://images.unsplash.com/photo-1524386189627-88c3ffcd40b0?auto=format&fit=crop&w=1600&q=80',
   },
 ];
 
@@ -325,9 +345,16 @@ export default function PodcastsScreen() {
               darkColor={cardSurface}
             >
               <View style={styles.seriesArtWrap}>
-                <Image source={{ uri: series.image }} style={styles.seriesArt} contentFit="cover" />
+                <Image
+                  source={{
+                    uri: series.banner,
+                  }}
+                  style={styles.seriesArt}
+                  contentFit="cover"
+                  transition={300}
+                />
                 <LinearGradient
-                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.55)']}
+                  colors={['rgba(15, 23, 42, 0)', 'rgba(15, 23, 42, 0.4)']}
                   style={styles.seriesArtOverlay}
                 />
                 <View style={styles.seriesArtBadge}>
