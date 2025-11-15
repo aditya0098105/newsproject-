@@ -159,10 +159,20 @@ export default function HomeScreen() {
         colors={colorScheme === 'dark' ? ['#111827', '#1f2937'] : ['#eef2ff', '#e0f2fe']}
         style={styles.heroShell}
       >
-        <View style={[styles.hero, { backgroundColor: heroBadgeBackground }] }>
-          <View style={styles.heroHeaderRow}>
-            <TimelineLogo size={52} showWordmark stacked />
-            <View style={styles.heroCtaBlock}>
+        <View style={[styles.hero, { backgroundColor: heroBadgeBackground, borderColor: borderSubtle }] }>
+          <View style={styles.heroBanner}>
+            <View style={styles.heroBrandBlock}>
+              <TimelineLogo size={48} showWordmark stacked />
+              <ThemedText
+                type="defaultSemiBold"
+                style={[styles.heroTagline, { color: heroBadgeForeground }]}
+                lightColor={heroBadgeForeground}
+                darkColor={heroBadgeForeground}
+              >
+                Timeline Intelligence
+              </ThemedText>
+            </View>
+            <View style={styles.heroCtaCluster}>
               <ThemedText style={[styles.heroCtaLabel, { color: heroBadgeForeground }]}>Live brief</ThemedText>
               <Pressable
                 onPress={() => router.push('/news')}
@@ -179,28 +189,47 @@ export default function HomeScreen() {
               </Pressable>
             </View>
           </View>
-          <ThemedText type="title" style={styles.heroTitle}>
-            Global Affairs Index
-          </ThemedText>
-          <ThemedText style={styles.heroSubtitle}>
-            Precision reporting, cinematic storytelling, and actionable briefings for decision-makers navigating volatile
-            civic landscapes.
-          </ThemedText>
-          <View style={styles.metricRow}>
+
+          <View style={styles.heroBody}>
+            <View style={styles.heroHeadlineGroup}>
+              <ThemedText type="title" style={styles.heroTitle}>
+                Global Affairs Index
+              </ThemedText>
+              <ThemedText style={styles.heroSubtitle}>
+                Precision reporting, cinematic storytelling, and actionable briefings for decision-makers navigating
+                volatile civic landscapes.
+              </ThemedText>
+            </View>
+
+            <ThemedView
+              lightColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15, 23, 42, 0.04)'}
+              darkColor={colorScheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(15, 23, 42, 0.06)'}
+              style={[styles.heroSpotlight, { borderColor: borderSubtle }]}
+            >
+              <View style={styles.heroSpotlightHeader}>
+                <IconSymbol name="sparkles" size={16} color={palette.tint} />
+                <ThemedText type="defaultSemiBold" style={styles.heroSpotlightTitle} lightColor={palette.tint} darkColor={palette.tint}>
+                  Tonight’s focus
+                </ThemedText>
+              </View>
+              <ThemedText style={styles.heroSpotlightCopy}>
+                Ministers convene in Nairobi to ratify the clean manufacturing compact while citizen councils stream
+                real-time oversight dashboards.
+              </ThemedText>
+            </ThemedView>
+          </View>
+
+          <View style={styles.metricPanel}>
             {heroMetrics.map((metric) => (
               <ThemedView
                 key={metric.label}
-                lightColor={metric.tone === 'accent' ? 'rgba(20, 184, 166, 0.08)' : highlightSurface}
-                darkColor={metric.tone === 'accent' ? 'rgba(45, 212, 191, 0.12)' : highlightSurface}
+                lightColor={highlightSurface}
+                darkColor={highlightSurface}
                 style={[styles.metricCard, { borderColor: borderSubtle }]}
               >
                 <View style={styles.metricPill}>
                   <LinearGradient
-                    colors={
-                      metric.tone === 'accent'
-                        ? palette.secondaryGradient ?? [palette.tint, palette.accent]
-                        : palette.gradient ?? [palette.tint, palette.accent]
-                    }
+                    colors={palette.secondaryGradient ?? [palette.tint, palette.accent]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.metricAccent}
@@ -540,23 +569,34 @@ const styles = StyleSheet.create({
   },
   heroShell: {
     borderRadius: 28,
-    padding: 2,
+    padding: 3,
     marginTop: -32,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   hero: {
-    padding: 24,
-    gap: 18,
-    borderRadius: 26,
+    padding: 28,
+    gap: 20,
+    borderRadius: 25,
+    borderWidth: 1,
   },
-  heroHeaderRow: {
+  heroBanner: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
-  heroCtaBlock: {
+  heroBrandBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  heroTagline: {
+    fontSize: 14,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+  heroCtaCluster: {
     alignItems: 'flex-end',
-    gap: 12,
+    gap: 10,
   },
   heroCtaLabel: {
     fontSize: 12,
@@ -573,8 +613,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 0.3,
   },
+  heroBody: {
+    gap: 16,
+  },
+  heroHeadlineGroup: {
+    gap: 12,
+  },
   heroTitle: {
-    fontSize: 36,
+    fontSize: 34,
     lineHeight: 40,
   },
   heroSubtitle: {
@@ -582,16 +628,37 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.9,
   },
-  metricRow: {
+  heroSpotlight: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 16,
+    gap: 10,
+  },
+  heroSpotlightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  heroSpotlightTitle: {
+    fontSize: 13,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  heroSpotlightCopy: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.85,
+  },
+  metricPanel: {
     flexDirection: 'row',
     gap: 12,
     flexWrap: 'wrap',
   },
   metricCard: {
     borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
+    borderRadius: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     flexGrow: 1,
     minWidth: 100,
     gap: 4,
