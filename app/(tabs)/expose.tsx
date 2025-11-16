@@ -9,54 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
-const dossierHighlights = [
-  {
-    title: 'USD $4.5B allegedly siphoned',
-    detail:
-      'U.S. Department of Justice investigators allege more than $4.5 billion was diverted from 1MDB into offshore vehicles linked to Malaysian and Emirati officials between 2009 and 2014.',
-    icon: 'globe.asia.australia.fill',
-  },
-  {
-    title: 'Luxuries seized worldwide',
-    detail:
-      'Civil forfeiture cases recovered assets including a $250M superyacht, Beverly Hills mansions, and rare art purchased with misappropriated funds, according to DoJ filings.',
-    icon: 'sailboat.fill',
-  },
-  {
-    title: 'Banks paid record fines',
-    detail:
-      'Goldman Sachs agreed to a $2.9B global settlement in 2020 and Malaysia negotiated $3.9B in penalties after prosecutors said bond offerings enabled the scheme.',
-    icon: 'dollarsign.circle.fill',
-  },
-];
-
-const timeline = [
-  {
-    year: '2009',
-    headline: '1MDB founded under Najib Razak',
-    summary:
-      'Malaysia transformed the Terengganu Investment Authority into 1MDB with Najib as advisory board chair, pledging to spur strategic development projects.',
-  },
-  {
-    year: '2015',
-    headline: 'Wall Street Journal exposes $700M transfer',
-    summary:
-      'Investigative reporting revealed funds linked to 1MDB were wired into Najib’s personal accounts, prompting domestic protests and official denials.',
-  },
-  {
-    year: '2016',
-    headline: 'DoJ launches “kleptocracy” suits',
-    summary:
-      'U.S. authorities filed civil actions to seize $1B in assets, calling it the largest kleptocracy case in DoJ history.',
-  },
-  {
-    year: '2022',
-    headline: 'Najib begins 12-year prison term',
-    summary:
-      'Malaysia’s Federal Court upheld Najib’s conviction for abuse of power, criminal breach of trust, and money laundering tied to SRC International, a former 1MDB unit.',
-  },
-];
+import { useExposeContent } from '@/hooks/use-expose-content';
 
 export default function ExposeScreen() {
   const colorScheme = useColorScheme();
@@ -64,6 +17,22 @@ export default function ExposeScreen() {
   const borderSubtle = colorScheme === 'dark' ? 'rgba(148, 163, 184, 0.2)' : '#e2e8f0';
   const cardSurface = colorScheme === 'dark' ? 'rgba(15, 23, 42, 0.75)' : '#ffffff';
   const accentSurface = colorScheme === 'dark' ? 'rgba(14, 116, 144, 0.24)' : 'rgba(14, 165, 233, 0.16)';
+  const { content, loading, error } = useExposeContent();
+
+  const {
+    heroBadgeLabel,
+    heroTitle,
+    heroSubtitle,
+    highlightCard,
+    dossierHighlights,
+    timeline,
+    takeaway,
+  } = content;
+  const statusColor = error
+    ? colorScheme === 'dark'
+      ? '#fda4af'
+      : '#b91c1c'
+    : palette.muted;
 
   return (
     <ParallaxScrollView
@@ -81,26 +50,32 @@ export default function ExposeScreen() {
         <View style={styles.heroBadge}>
           <IconSymbol name="exclamationmark.triangle.fill" size={18} color={palette.background} />
           <ThemedText style={styles.heroBadgeText} lightColor={palette.background} darkColor={palette.background}>
-            Accountability desk
+            {heroBadgeLabel}
           </ThemedText>
         </View>
         <ThemedText type="title" style={styles.heroTitle}>
-          1MDB global money trail
+          {heroTitle}
         </ThemedText>
         <ThemedText style={styles.heroSubtitle}>
-          How Malaysia’s sovereign development fund became the centre of a multi-billion-dollar fraud touching Hollywood, Gulf investment funds, and Wall Street banks.
+          {heroSubtitle}
         </ThemedText>
       </ThemedView>
+
+      {(loading || error) && (
+        <ThemedText style={[styles.syncStatus, { color: statusColor }]}>
+          {loading ? 'Syncing the latest dossier…' : error}
+        </ThemedText>
+      )}
 
       <LinearGradient
         colors={colorScheme === 'dark' ? ['rgba(14,116,144,0.28)', 'rgba(8,47,73,0.9)'] : ['rgba(14,165,233,0.35)', '#0ea5e9']}
         style={styles.highlightCard}
       >
         <ThemedText type="subtitle" style={styles.highlightTitle} lightColor="#ffffff" darkColor="#ffffff">
-          “The largest kleptocracy case to date”
+          {highlightCard.title}
         </ThemedText>
         <ThemedText style={styles.highlightQuote} lightColor="rgba(255,255,255,0.85)" darkColor="rgba(255,255,255,0.85)">
-          U.S. prosecutors say bonds arranged for 1MDB were immediately rerouted to shell companies controlled by financier Low Taek Jho and allies—funding luxury property, films like “The Wolf of Wall Street,” and political influence campaigns.
+          {highlightCard.quote}
         </ThemedText>
       </LinearGradient>
 
@@ -153,12 +128,16 @@ export default function ExposeScreen() {
       </ThemedView>
 
       <ThemedView style={[styles.takeawayCard, { borderColor: borderSubtle }]} lightColor={cardSurface} darkColor={cardSurface}>
-        <IconSymbol name="lightbulb.fill" size={24} color={palette.tint} />
+        <IconSymbol
+          name={takeaway.icon as ComponentProps<typeof IconSymbol>['name']}
+          size={24}
+          color={palette.tint}
+        />
         <ThemedText type="subtitle" style={styles.takeawayTitle}>
-          What’s next
+          {takeaway.title}
         </ThemedText>
         <ThemedText style={styles.takeawayBody}>
-          Malaysia continues pursuing Low Taek Jho and other fugitives while auditing recovery of 1MDB-linked assets. Stay alert for U.S. court filings on forfeiture auctions and Malaysia’s ongoing negotiations with international banks.
+          {takeaway.body}
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
@@ -199,6 +178,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     opacity: 0.9,
+  },
+  syncStatus: {
+    marginTop: 8,
+    marginBottom: 12,
+    fontSize: 14,
   },
   highlightCard: {
     borderRadius: 24,
