@@ -3,8 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import exposeFallbackContent, {
   type ExposeContent,
 } from '@/constants/expose-content';
-
-const CMS_ENDPOINT = process.env.EXPO_PUBLIC_EXPOSE_CMS_URL;
+import { EXPOSE_CONTENT_URL } from '@/constants/expose-source';
 
 const mergeContent = (incoming?: Partial<ExposeContent>): ExposeContent => ({
   heroBadgeLabel: incoming?.heroBadgeLabel ?? exposeFallbackContent.heroBadgeLabel,
@@ -30,12 +29,13 @@ const mergeContent = (incoming?: Partial<ExposeContent>): ExposeContent => ({
 
 export function useExposeContent() {
   const [content, setContent] = useState<ExposeContent>(exposeFallbackContent);
-  const [loading, setLoading] = useState<boolean>(Boolean(CMS_ENDPOINT));
+  const [loading, setLoading] = useState<boolean>(Boolean(EXPOSE_CONTENT_URL));
   const [error, setError] = useState<string | undefined>();
 
   const fetchContent = useCallback(async () => {
-    if (!CMS_ENDPOINT) {
+    if (!EXPOSE_CONTENT_URL) {
       setLoading(false);
+      setError('Expose JSON source URL has not been configured.');
       return;
     }
 
@@ -43,7 +43,7 @@ export function useExposeContent() {
     setError(undefined);
 
     try {
-      const response = await fetch(CMS_ENDPOINT);
+      const response = await fetch(EXPOSE_CONTENT_URL);
 
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
@@ -52,7 +52,7 @@ export function useExposeContent() {
       const payload = (await response.json()) as Partial<ExposeContent>;
       setContent(mergeContent(payload));
     } catch (err) {
-      console.error('Failed to load expose CMS payload', err);
+      console.error('Failed to load expose JSON payload', err);
       setContent(exposeFallbackContent);
       setError('Unable to sync the latest dossier right now. Showing last published data.');
     } finally {
